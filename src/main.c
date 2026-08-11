@@ -38,32 +38,34 @@ void cube()
 {
     //  变换结果储存
     box b2;
-    Matrix_4x4 rot, s0;
     float r = 0;
     uint16_t n = 0;
+    Matrix_4x4 S, R, T;
     while (1)
     {
-        Matrix_4x4 identity_matrix =
-            {
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}};
+        // 构造模型矩阵:先缩放,再旋转,再平移
+        Matrix_4x4 model = {
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}};
         if (n >= 360)
             n = 0;
-        // transformation
-        r = (M_PI / 180) * (float)n++;
-        rotate_xyz_3d(rot, r, -r, r);
-        scale_3d(s0, 15, 15, 15);
-        // matrix multiply
-        matrix_multiply_4x4(identity_matrix, rot, identity_matrix);
-        matrix_multiply_4x4(identity_matrix, s0, identity_matrix);
+        r = (M_PI / 180.0f) * (float)n++;
+        scale_3d(S, 15, 15, 15);    // 缩放
+        rotate_zyx_3d(R, r, -r, r); // 旋转 绕自身轴
+        translate_3d(T, 0, 0, -50); // 平移到相机前方
+
+        // 矩阵乘法:model = T * R * S 顺序很重要
+        matrix_multiply_4x4(model, S, model); // model = S
+        matrix_multiply_4x4(model, R, model); // model = R*S
+        matrix_multiply_4x4(model, T, model); // model = T*R*S
         // vector multiply
         for (uint8_t i = 0; i < 8; i++)
         {
             Vector_4 temp_vec0 =
                 {b1[i][0], b1[i][1], b1[i][2], 1};
-            matrix_vector_multiply(temp_vec0, identity_matrix, temp_vec0);
+            matrix_vector_multiply(temp_vec0, model, temp_vec0);
             memcpy(b2[i], temp_vec0, sizeof(Vector_4));
         }
         // 底面边 - 红色
@@ -87,12 +89,12 @@ void cube()
         clear();
         graphmem_show();
         clear_gmem();
-        print_matrix(identity_matrix, 4, 4);
+        print_matrix(model, 4, 4);
         usleep(16383);
     }
 }
 
-// 返回值:1 相交,0 不相交；t 为距离,u,v 为重心坐标
+// 返回值:1 相交,0 不相交;t 为距离,u,v 为重心坐标
 int ray_triangle_intersect(
     Vector_3 O, Vector_3 D, Vector_3 V0, Vector_3 V1, Vector_3 V2,
     float *t, float *u, float *v)
@@ -167,7 +169,7 @@ void rt_cube()
             n = 0;
         r = (M_PI / 180.0f) * (float)n++;
         scale_3d(S, 15, 15, 15);    // 缩放
-        rotate_xyz_3d(R, r, -r, r); // 旋转 绕自身轴
+        rotate_zyx_3d(R, r, -r, r); // 旋转 绕自身轴
         translate_3d(T, 0, 0, -50); // 平移到相机前方
 
         // 矩阵乘法:model = T * R * S 顺序很重要
@@ -334,7 +336,7 @@ void ball()
                                    hit_point.z - sphere_center.z};
                 normal = vector3_normalize(normal); // 法线长度变1
 
-                // 把法线方向映射成颜色(像不像红蓝3D眼镜？)
+                // 把法线方向映射成颜色
                 r = (int)((normal.x + 1.0f) * 0.5f * 255);
                 g = (int)((normal.y + 1.0f) * 0.5f * 255);
                 b = (int)((normal.z + 1.0f) * 0.5f * 255);
@@ -356,8 +358,8 @@ void ball()
 int main()
 {
     // output();
-    // cube();
-    rt_cube();
+    cube();
+    //rt_cube();
     // ball();
     return 0;
 }

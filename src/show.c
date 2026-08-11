@@ -21,13 +21,12 @@ void graphmem_show()
                 (color >> 8) & 0xFF,
                 color & 0xFF);
         }
-        printf("\r\n");
+        printf("\n");
     }
 }
 
-void set_point_color(const uint8_t x, const uint16_t y, pixel_color_t color)
+void set_point_color(const uint8_t x, const uint8_t y, pixel_color_t color)
 {
-    // 保存颜色
     if (x < W && y < H)
         Color_Buffer[x][y] = (uint32_t)color;
 }

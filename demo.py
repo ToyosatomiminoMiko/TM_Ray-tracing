@@ -13,8 +13,8 @@ class Vector_3:
 
 
 def vector3_normalize(v: Vector_3) -> Vector_3:
-    len: float = pow(v.x * v.x + v.y * v.y + v.z * v.z, 2)
-    if len == 0:
+    length: float = pow(v.x * v.x + v.y * v.y + v.z * v.z, 0.5)
+    if length == 0:
         return Vector_3(0, 0, 0)
     return Vector_3(v.x / len, v.y / len, v.z / len)
 

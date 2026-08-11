@@ -5,10 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-// resolution: 128 * 64
-// #define H (uint8_t)64
-// #define W (uint8_t)128
-
+// resolution: 160*80
 #define H (uint8_t)80
 #define W (uint8_t)160
 
@@ -22,7 +19,7 @@ extern const pixel_color_t COLOR_BLUE;
 extern const pixel_color_t COLOR_WHITE;
 
 void graphmem_show();
-void set_point_color(const uint8_t x, const uint16_t y, pixel_color_t color);
+void set_point_color(const uint8_t x, const uint8_t y, pixel_color_t color);
 void clear_gmem();
 void draw_line(
     const uint8_t x1, const uint8_t y1,

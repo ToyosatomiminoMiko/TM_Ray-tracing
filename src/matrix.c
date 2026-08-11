@@ -93,7 +93,7 @@ void scale_3d(Matrix_4x4 homogeneous, float sx, float sy, float sz)
     memcpy(homogeneous, result, sizeof(Matrix_4x4));
 }
 
-void rotate_xyz_3d(Matrix_4x4 homogeneous, float phi, float theta, float psi)
+void rotate_zyx_3d(Matrix_4x4 homogeneous, float phi, float theta, float psi)
 {
     float cx = cosf(phi), sx = sinf(phi);
     float cy = cosf(theta), sy = sinf(theta);
@@ -128,6 +128,6 @@ void print_matrix(Matrix_4x4 matrix, const uint8_t x, const uint8_t y)
         {
             printf("%8.4f ", matrix[m][n]);
         }
-        printf("\r\n");
+        printf("\n");
     }
 }

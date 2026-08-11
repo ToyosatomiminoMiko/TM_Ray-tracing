@@ -18,7 +18,7 @@ void translate_3d(Matrix_4x4 homogeneous, float const tx, float const ty, float 
 void rotate_x_3d(Matrix_4x4 homogeneous, const float theta);
 void rotate_y_3d(Matrix_4x4 homogeneous, const float theta);
 void rotate_z_3d(Matrix_4x4 homogeneous, const float theta);
-void rotate_xyz_3d(Matrix_4x4 homogeneous, float phi, float theta, float psi);
+void rotate_zyx_3d(Matrix_4x4 homogeneous, float phi, float theta, float psi);
 void scale_3d(Matrix_4x4 homogeneous, float sx, float sy, float sz);
 
 void print_matrix(Matrix_4x4 matrix, const uint8_t x, const uint8_t y);
