@@ -4,10 +4,10 @@
 Vector_3 vector3_normalize(Vector_3 v)
 {
     float len = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    // 防止除以 0
-    if (len == 0)
+    if (len < 1e-8f) // 长度小于这个阈值就当零向量处理
         return (Vector_3){0, 0, 0};
-    return (Vector_3){v.x / len, v.y / len, v.z / len};
+    float inv = 1.0f / len;
+    return (Vector_3){v.x * inv, v.y * inv, v.z * inv};
 }
 
 // 根据像素坐标生成光线方向

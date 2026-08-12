@@ -1,3 +1,8 @@
+/*
+提供4x4矩阵,4向量乘法
+3D平移,旋转,缩放
+矩阵打印方法
+*/
 #include "matrix.h"
 
 void matrix_multiply_4x4(Matrix_4x4 result, const Matrix_4x4 a, const Matrix_4x4 b)

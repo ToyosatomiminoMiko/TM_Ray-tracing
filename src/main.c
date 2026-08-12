@@ -15,13 +15,13 @@ void line(float x0, float y0, float x1, float y1, pixel_color_t color)
 
 /*
 (ANSI)clear
-`\033[3J` 清除滚动缓冲区(scrollback buffer)
-`\033[2J` 清空整个屏幕
-`\033[H` 将光标移动到屏幕左上角
+`\x1b[3J` 清除回滚缓冲区(scrollback buffer)
+`\x1b[2J` 清空整个屏幕
+`\x1b[H` 将光标移动到屏幕左上角
 */
 void clear()
 {
-    printf("\033[3J\033[2J\033[H");
+    printf("\x1b[3J\x1b[2J\x1b[H");
 }
 
 const box b1 = {
@@ -359,7 +359,7 @@ int main()
 {
     // output();
     cube();
-    //rt_cube();
-    // ball();
+    // rt_cube();
+    //  ball();
     return 0;
 }
