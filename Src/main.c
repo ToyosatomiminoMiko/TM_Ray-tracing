@@ -326,7 +326,7 @@ void ball()
             int r, g, b;
             if (t > 0)
             {
-                // 命中！计算命中点的位置
+                // 命中!计算命中点的位置
                 Vector_3 hit_point = {origin.x + dir.x * t,
                                       origin.y + dir.y * t,
                                       origin.z + dir.z * t};
@@ -358,8 +358,8 @@ void ball()
 int main()
 {
     // output();
-    cube();
-    // rt_cube();
-    //  ball();
+    // cube();
+    rt_cube();
+    // ball();
     return 0;
 }
