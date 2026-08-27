@@ -2,6 +2,7 @@
 #include "show.h"
 #include "ray_tracing.h"
 #include "main.h"
+#include "vector.h"
 
 /*
 声明式绘图
@@ -191,7 +192,7 @@ void rt_cube()
         {
             for (int i = 0; i < W; i++)
             {
-                Vector_3 dir = ray_direction(i, j);
+                Vector_3 dir = ray_direction(i, j, W, H);
                 float t_min = 1e30f;
                 int hit = 0;
                 Vector_3 hit_normal = {0, 0, 0};
@@ -247,7 +248,10 @@ void rt_cube()
     }
 }
 
-void output()
+/*
+颜色渐变示例
+*/
+void color_radient()
 {
     // 遍历每一行(从上到下)
     for (int j = 0; j < H; j++)
@@ -255,7 +259,7 @@ void output()
         for (int i = 0; i < W; i++)
         {
             // 生成这束光的方向
-            Vector_3 dir = ray_direction(i, j);
+            Vector_3 dir = ray_direction(i, j, W, H);
             // 把方向向量映射成 0..255 的颜色值
             // 如果方向朝右(x正)红色多,朝上(y正)绿色多
             int r = (int)((dir.x + 1.0f) * 0.5f * 255); // 把 -1..1 映射到 0..255
@@ -268,8 +272,12 @@ void output()
     graphmem_show();
 }
 
-// 性能优化版求交(利用了 D 归一化)
-// 返回 t(距离),未命中返回 -1
+/*
+求光线与球的距离
+性能优化版求交(利用了 D 归一化)
+params: 光线起点 O,方向 D,球心 C,半径 R
+return t(距离), -1(未命中)
+*/
 float intersect_sphere_fast(Vector_3 O, Vector_3 D, Vector_3 C, float R)
 {
     // 1. 计算从球心指向光线起点的向量(注意方向)
@@ -290,8 +298,12 @@ float intersect_sphere_fast(Vector_3 O, Vector_3 D, Vector_3 C, float R)
     return t;
 }
 
-// 传入光线起点 O(0,0,0),方向 D,球心 C,半径 R
-// 返回 t 值(距离),如果没碰到返回 -1
+/*
+求光线与球的距离
+简单写法 直接套求根公式
+params: 光线起点 O,方向 D,球心 C,半径 R
+return t(距离), -1(未命中)
+*/
 float intersect_sphere_simple(Vector_3 O, Vector_3 D, Vector_3 C, float R)
 {
     Vector_3 OC = {O.x - C.x, O.y - C.y, O.z - C.z}; // 指向球心的向量
@@ -307,7 +319,10 @@ float intersect_sphere_simple(Vector_3 O, Vector_3 D, Vector_3 C, float R)
     return t;
 }
 
-void ball()
+/*
+渲染球
+*/
+void rt_ball()
 {
     // 定义一个球:放在 (0, 0, -3) 处,半径 1.0
     Vector_3 sphere_center = {0.0f, 0.0f, -3.0f};
@@ -318,7 +333,7 @@ void ball()
     {
         for (int i = 0; i < W; i++)
         {
-            Vector_3 dir = ray_direction(i, j);
+            Vector_3 dir = ray_direction(i, j, W, H);
 
             // 调用性能优化版求交
             float t = intersect_sphere_fast(origin, dir, sphere_center, sphere_radius);
@@ -355,11 +370,100 @@ void ball()
     graphmem_show();
 }
 
+int light_source()
+{
+    FILE *fp = fopen("output.ppm", "w");
+    fprintf(fp, "P3\n%d %d\n255\n", W, H);
+
+    // --- 场景设置 ---
+    // 1. 球体:放在正前方
+    Vector_3 sphere_center = {0.0f, 0.0f, -3.0f};
+    float sphere_radius = 1.0f;
+    // 球的颜色(红色)
+    Vector_3 albedo = {1.0f, 0.2f, 0.2f};
+
+    // 2. 点光源:放在右上方(观察者的视角)
+    Vector_3 light_pos = {1.5f, 1.5f, -2.0f};
+    float ambient_strength = 0.15f; // 环境光(防止死黑)
+
+    Vector_3 origin = {0.0f, 0.0f, 0.0f};
+
+    for (int j = 0; j < H; j++)
+    {
+        for (int i = 0; i < W; i++)
+        {
+            Vector_3 dir = ray_direction(i, j, W, H);
+
+            // -------- 第一部分:主光线撞球(沿用你之前的优化函数) --------
+            float t = intersect_sphere_fast(origin, dir, sphere_center, sphere_radius);
+
+            int r, g, b;
+            if (t > 0)
+            {
+                // 1. 计算命中点 P
+                Vector_3 P = vector3_add(origin, vector3_scale(dir, t));
+
+                // 2. 计算法线 N(球心指向P,因为半径是1,这里省了除法)
+                Vector_3 N = vector3_sub(P, sphere_center);
+                N = vector3_normalize(N); // 长度变1,保证亮度均匀
+
+                // -------- 第二部分:阴影判定(性能优化核心!) --------
+                // 光源方向 L = (光源位置 - P) 归一化
+                Vector_3 L = vector3_sub(light_pos, P);
+                float dist_to_light = sqrt(L.x * L.x + L.y * L.y + L.z * L.z);
+                L = vector3_normalize(L); // 只取方向
+
+                // [性能优化第1招:微小偏移]把发射点沿法线向外挪0.001,防止光线撞到自己脸上
+                Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+
+                // 发射阴影光线,判断是否被遮挡
+                // [性能优化第2招:只算有没有挡,不算最近交点(提前退出)]
+                float t_shadow = intersect_sphere_fast(shadow_origin, L, sphere_center, sphere_radius);
+
+                // 如果阴影光线撞到了球,且撞点距离 小于 光源距离,说明被自己挡了(在阴影里)
+                float in_shadow = 0.0f;
+                if (t_shadow > 0 && t_shadow < dist_to_light)
+                    in_shadow = 1.0f; // 处于阴影中
+
+                // -------- 第三部分:计算光照强度(漫反射) --------
+                // 计算光线和法线的夹角(点积).夹角度数越小越亮
+                float diff = vector3_dot(N, L);
+                if (diff < 0)
+                    diff = 0; // 如果光从背后打过来,就是纯黑
+
+                // 如果处于阴影中,漫反射直接为0(被挡住了没光)
+                if (in_shadow > 0.5f)
+                    diff = 0.0f;
+
+                // [最终亮度]环境光保底 + 漫反射光照
+                float brightness = ambient_strength + (1.0f - ambient_strength) * diff;
+
+                // 乘上球的颜色,映射到 0~255
+                r = (int)(albedo.x * brightness * 255);
+                g = (int)(albedo.y * brightness * 255);
+                b = (int)(albedo.z * brightness * 255);
+            }
+            else
+            {
+                // 背景色(渐变天空)
+                r = (int)((dir.y + 1.0f) * 0.5f * 255);
+                g = (int)((dir.y + 1.0f) * 0.5f * 255);
+                b = 255;
+            }
+            fprintf(fp, "%d %d %d\n", r, g, b);
+        }
+    }
+    fclose(fp);
+    printf("带阴影和光照的球体渲染完成!打开 output.ppm 看看效果!\n");
+    return 0;
+}
+
 int main()
 {
-    // output();
+    // color_radient();
     // cube();
-    rt_cube();
-    // ball();
+    // rt_cube();
+    // rt_ball();
+    light_source();
     return 0;
 }

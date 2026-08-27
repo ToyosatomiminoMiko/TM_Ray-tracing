@@ -4,13 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "show.h"
+#include "vector.h"
 
-typedef struct
-{
-    float x, y, z;
-} Vector_3;
-
-Vector_3 vector3_normalize(Vector_3 v);
-Vector_3 ray_direction(int i, int j);
+Vector_3 ray_direction(int i, int j, int w, int h);
 
 #endif // RAY_TRACING_H

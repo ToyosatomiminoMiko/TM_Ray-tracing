@@ -6,9 +6,9 @@ include_directories(${PROJECT_SOURCE_DIR}/Inc)
 
 add_executable(matrix
     Src/main.c
+    Src/vector.c
     Src/matrix.c
     Src/show.c
     Src/ray_tracing.c
 )
 target_link_libraries(matrix PRIVATE m)
-# ok

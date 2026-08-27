@@ -1,25 +1,15 @@
 #include "ray_tracing.h"
 
-// 向量归一化 把长度变成 1
-Vector_3 vector3_normalize(Vector_3 v)
-{
-    float len = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    if (len < 1e-8f) // 长度小于这个阈值就当零向量处理
-        return (Vector_3){0, 0, 0};
-    float inv = 1.0f / len;
-    return (Vector_3){v.x * inv, v.y * inv, v.z * inv};
-}
-
 // 根据像素坐标生成光线方向
-Vector_3 ray_direction(int i, int j)
+Vector_3 ray_direction(int i, int j, int w, int h)
 {
     /*
     1.算 0..1 的像素中心
     屏幕中心是(0,0)
     这个像素在屏幕上的位置(百分比)
     */
-    float u = (i + 0.5f) / (float)W;
-    float v = (j + 0.5f) / (float)H;
+    float u = (i + 0.5f) / (float)w;
+    float v = (j + 0.5f) / (float)h;
 
     /*
     2.映射到 -1 到 +1
@@ -29,7 +19,7 @@ Vector_3 ray_direction(int i, int j)
     float y = 2.0f * v - 1.0f;
 
     // 3.修正宽高比(让 X 轴适应屏幕宽度)
-    float aspect_ratio = (float)W / (float)H;
+    float aspect_ratio = (float)w / (float)h;
     x = x * aspect_ratio;
 
     // 4.Y 轴取反(因为图像坐标 Y 向下)
