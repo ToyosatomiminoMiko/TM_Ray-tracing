@@ -8,7 +8,7 @@
 
 #define DEG2RAD (3.14159265358979323846f / 180.0f)
 #define FOV (60.0f * DEG2RAD) /* 垂直视场角 60 度 */
-#define FRAMES 120
+#define ORBIT_SECONDS 3.0f /* 相机绕一整圈需要的秒数 */
 
 /*
 第 8 课:轨道相机 + 透视
@@ -24,6 +24,7 @@ typedef struct
     float shininess;
 } SceneObject;
 
+/* 场景表:{{球心, 半径}, 颜色, 反光度};相机绕着这三个球转 */
 static const SceneObject objects[] = {
     {{{-1.1f, 0.0f, -2.5f}, 0.9f}, {0.9f, 0.2f, 0.2f}, 32.0f},
     {{{1.1f, -0.15f, -2.2f}, 0.7f}, {0.2f, 0.7f, 0.2f}, 64.0f},
@@ -37,10 +38,10 @@ static const float specular_strength = 0.8f;
 static const float plane_y = -1.0f;
 static const Vector_3 plane_normal = {0.0f, 1.0f, 0.0f};
 
-/* 场景着色(球 + 地面),返回 0..1 颜色 */
+/* 场景着色(球 + 地面):对一条光线找最近交点,再按命中物算光照 */
 static Vector_3 trace_color(Ray ray)
 {
-    /* 最近的交点:平面 + 所有球 */
+    /* 先算地面,再算所有球,t 最小的才是"这束光线看见的表面" */
     float t_plane = 0.0f;
     int hit_plane = intersect_plane(ray, plane_normal, (Vector_3){0.0f, plane_y, 0.0f}, &t_plane);
 
@@ -138,10 +139,13 @@ static Vector_3 trace_color(Ray ray)
     return (Vector_3){t, t, 1.0f};
 }
 
-int lesson08_render(framebuffer_t *fb, int frame)
+int lesson08_render(framebuffer_t *fb, float time_seconds)
 {
-    /* 相机绕 Y 轴转一圈 */
-    float angle = 2.0f * (float)M_PI * (float)frame / (float)FRAMES;
+    /*
+    时间驱动动画:3 秒绕 Y 轴转一整圈.
+    帧率由 main 决定,这里只关心"现在该转到哪个角度".
+    */
+    float angle = 2.0f * (float)M_PI * time_seconds / ORBIT_SECONDS;
     Vector_3 eye = {5.0f * cosf(angle), 1.2f, 5.0f * sinf(angle)};
     Vector_3 center = {0.0f, 0.0f, -1.0f};
     Vector_3 up = {0.0f, 1.0f, 0.0f};

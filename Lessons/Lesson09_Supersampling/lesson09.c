@@ -18,6 +18,7 @@ typedef struct
     float shininess;
 } SceneObject;
 
+/* 场景表:{{球心, 半径}, 颜色, 反光度};与第 6 课同一套场景 */
 static const SceneObject objects[] = {
     {{{-1.1f, 0.0f, -3.5f}, 0.9f}, {0.9f, 0.2f, 0.2f}, 32.0f},
     {{{1.1f, -0.15f, -3.2f}, 0.7f}, {0.2f, 0.7f, 0.2f}, 64.0f},
@@ -31,7 +32,7 @@ static const float specular_strength = 0.8f;
 
 /*
 对像素 (i,j) 内偏移 (ox,oy)(0..1 表示像素内相对位置)采样一条光线,
-返回该子像素的颜色(0..1)。
+返回该子像素的颜色(0..1).
 */
 static Vector_3 sample_color(int i, int j, float ox, float oy)
 {
@@ -42,6 +43,7 @@ static Vector_3 sample_color(int i, int j, float ox, float oy)
         ox, oy);
     Ray ray = {origin, dir};
 
+    /* 与第 6 课相同:找最近球、算漫反射 + 高光 + 阴影 */
     int nearest = -1;
     float t_nearest = 1e30f;
     for (int k = 0; k < OBJECT_COUNT; k++)
@@ -100,9 +102,9 @@ static Vector_3 sample_color(int i, int j, float ox, float oy)
         obj->albedo.z * brightness + spec};
 }
 
-int lesson09_render(framebuffer_t *fb, int frame)
+int lesson09_render(framebuffer_t *fb, float time_seconds)
 {
-    (void)frame;
+    (void)time_seconds; /* 静态课程 */
 
     for (int j = 0; j < H; j++)
     {

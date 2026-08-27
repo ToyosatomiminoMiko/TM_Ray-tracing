@@ -11,7 +11,7 @@
 /*
 第 3 课:光线追踪立方体
 把立方体拆成 12 个三角形,对每个像素发射一条光线,
-用 Möller–Trumbore 求最近交点,再用法线方向上色。
+用 Möller–Trumbore 求最近交点,再用法线方向上色.
 */
 static const box b1 = {
     {-1, -1, -1, 1},
@@ -23,7 +23,7 @@ static const box b1 = {
     {1, 1, -1, 1},
     {1, 1, 1, 1}};
 
-int lesson03_render(framebuffer_t *fb, int frame)
+int lesson03_render(framebuffer_t *fb, float time_seconds)
 {
     /* 12 个三角形索引 */
     const uint8_t tri_indices[12][3] = {
@@ -45,8 +45,8 @@ int lesson03_render(framebuffer_t *fb, int frame)
     Vector_3 origin = {0.0f, 0.0f, 0.0f};
     Matrix_4x4 S, R, T;
 
-    /* 每帧旋转 6 度,总共 60 帧转完一圈 */
-    float r = DEG2RAD * (float)(frame * 6);
+    /* 时间驱动动画:每秒转一整圈(360 度),与帧率无关 */
+    float r = DEG2RAD * (time_seconds * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
     Matrix_4x4 model = {
@@ -71,7 +71,12 @@ int lesson03_render(framebuffer_t *fb, int frame)
         memcpy(b2[i], temp, sizeof(Vector_4));
     }
 
-    /* 光线追踪渲染 */
+    /*
+    光线追踪渲染:对每个像素都做三件事
+    1. 生成一条从原点出发的光线
+    2. 遍历 12 个三角形,记录最近的命中(t 最小)
+    3. 用命中点的面法线决定颜色,写进帧缓冲
+    */
     for (int j = 0; j < H; j++)
     {
         for (int i = 0; i < W; i++)

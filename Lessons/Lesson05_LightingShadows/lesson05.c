@@ -8,11 +8,11 @@
 1. 命中点 P 与法线 N
 2. 阴影判定(从 P 沿光源方向发一条阴影光线)
 3. 漫反射光照(环境光保底 + N·L)
-画面只渲染进内存帧缓冲,不再直接写文件。
+画面只渲染进内存帧缓冲,不再直接写文件.
 */
-int lesson05_render(framebuffer_t *fb, int frame)
+int lesson05_render(framebuffer_t *fb, float time_seconds)
 {
-    (void)frame;
+    (void)time_seconds; /* 静态课程 */
 
     /* --- 场景设置 --- */
     /* 1. 球体:放在正前方,红色 */

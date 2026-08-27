@@ -22,6 +22,11 @@ typedef struct
     float reflectivity; /* 0 = 不反射,1 = 完全镜面 */
 } SceneObject;
 
+/*
+场景表:每行是一个球
+格式:{{球心(x,y,z), 半径}, 颜色(RGB), 反光度, 反射率}
+反射率决定局部颜色与反射颜色的混合比例.
+*/
 static const SceneObject objects[] = {
     /* 镜面球(金属感) */
     {{{0.2f, -0.25f, -2.8f}, 0.7f}, {0.7f, 0.7f, 0.7f}, 64.0f, 0.9f},
@@ -89,10 +94,16 @@ static Vector_3 checker_color(Vector_3 P)
     return (Vector_3){c, c, c};
 }
 
-/* 递归追踪一条光线,返回 0..1 颜色 */
+/*
+递归追踪一条光线,返回 0..1 颜色.
+每次只做三件事:
+1. 在所有物体(地面 + 球)里找最近的交点
+2. 按命中类型上色:球 -> 局部光照 + 反射;地面 -> 棋盘格 + 光照
+3. 什么都没命中 -> 渐变天空
+*/
 static Vector_3 trace_color(Ray ray, int depth)
 {
-    /* 求场景里最近的交点(平面 + 所有球) */
+    /* 先求地面交点,再把所有球比一遍,取 t 最小的作为"可见表面" */
     float t_plane = 0.0f;
     int hit_plane = intersect_plane(ray, plane_normal, (Vector_3){0.0f, plane_y, 0.0f}, &t_plane);
 
@@ -149,9 +160,9 @@ static Vector_3 trace_color(Ray ray, int depth)
     return (Vector_3){t, t, 1.0f};
 }
 
-int lesson07_render(framebuffer_t *fb, int frame)
+int lesson07_render(framebuffer_t *fb, float time_seconds)
 {
-    (void)frame;
+    (void)time_seconds; /* 静态课程 */
 
     Vector_3 origin = {0.0f, 0.0f, 0.0f};
     for (int j = 0; j < H; j++)

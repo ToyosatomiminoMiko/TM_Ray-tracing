@@ -8,15 +8,20 @@
 /*
 课程接口:
 每节课只负责把一帧画进 framebuffer_t(内存),
-输出(终端动画 / PPM 文件)由 main 统一处理。
+输出(终端动画 / PPM 文件)由 main 统一处理.
+
+动画采用"时间驱动"而不是"帧号驱动":
+课程只声明 时长 duration 和 帧率 fps,
+render 收到的是当前时刻 time_seconds(秒),由它自己决定画面.
+这样动画快慢、帧率、导出帧数互不牵连,更接近游戏引擎的思路.
 */
 typedef struct
 {
-    const char *id;        /* 命令行里使用的 id,例如 lesson03 */
-    const char *title;     /* 课程标题 */
-    int frames;            /* 0 = 静态单帧;>0 = 动画总帧数 */
-    uint32_t frame_delay_us; /* 动画帧间隔(微秒) */
-    int (*render)(framebuffer_t *fb, int frame); /* 渲染第 frame 帧,返回非 0 表示提前结束 */
+    const char *id;     /* 命令行里使用的 id,例如 lesson03 */
+    const char *title;  /* 课程标题 */
+    float duration;     /* 动画时长(秒);0 = 静态课程,只渲染 t=0 一帧 */
+    float fps;          /* 动画帧率(每秒渲染多少帧);静态课程填 0 */
+    int (*render)(framebuffer_t *fb, float time_seconds); /* 渲染 time_seconds 时刻的画面 */
 } lesson_t;
 
 /* 按 id 查找课程,找不到返回 NULL */

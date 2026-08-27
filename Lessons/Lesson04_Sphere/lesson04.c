@@ -5,11 +5,11 @@
 /*
 第 4 课:渲染球体
 用一元二次方程求光线与球的交点,
-把命中点的法线方向映射成颜色,并保留渐变天空背景。
+把命中点的法线方向映射成颜色,并保留渐变天空背景.
 */
-int lesson04_render(framebuffer_t *fb, int frame)
+int lesson04_render(framebuffer_t *fb, float time_seconds)
 {
-    (void)frame;
+    (void)time_seconds; /* 静态课程 */
 
     /* 定义一个球:放在 (0, 0, -3) 处,半径 1.0 */
     Sphere sphere = {{0.0f, 0.0f, -3.0f}, 1.0f};

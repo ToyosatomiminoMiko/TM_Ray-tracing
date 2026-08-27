@@ -11,47 +11,79 @@
 1. 每帧先清空内存帧缓冲
 2. 调用课程渲染函数,把画面画进内存
 3. 按模式从内存输出:终端 ANSI 动画,或 PPM 文件
-课程内部不允许直接写文件,保证"统一先入内存"。
+课程内部不允许直接写文件,保证"统一先入内存".
+
+动画由统一循环驱动,不再分成"终端循环"和"文件循环"两套代码:
+循环只负责"在什么时刻渲染",真正把画面交给屏幕还是文件,
+由 output_frame 这个回调按模式决定.
 */
 
-static void run_ansi(const lesson_t *lesson)
+typedef enum
 {
-    int frame_count = lesson->frames > 0 ? lesson->frames : 1;
-    for (int frame = 0; frame < frame_count; frame++)
-    {
-        framebuffer_t fb;
-        fb_clear(&fb);
-        if (lesson->render(&fb, frame) != 0)
-            break;
+    OUTPUT_ANSI,
+    OUTPUT_PPM
+} output_mode_t;
 
+/*
+输出回调:把"内存里已经画好的一帧"交给终端或 PPM 文件.
+frame_index 只用于给动画帧命名(lessonXX_0000.ppm),不参与动画逻辑.
+*/
+static void output_frame(const lesson_t *lesson, const framebuffer_t *fb, int frame_index, output_mode_t mode)
+{
+    if (mode == OUTPUT_PPM)
+    {
+        /* 动画按帧号写序列文件,静态课程直接写单个文件 */
+        char path[256];
+        if (lesson->duration > 0.0f)
+            snprintf(path, sizeof(path), "out/%s_%04d.ppm", lesson->id, frame_index);
+        else
+            snprintf(path, sizeof(path), "out/%s.ppm", lesson->id);
+        output_ppm(fb, path);
+        printf("已写出 %s\n", path);
+    }
+    else
+    {
+        /* 终端动画:先清屏再整幅打印;按帧率睡一觉,控制播放速度 */
         output_clear_screen();
-        output_ansi(&fb);
-        if (lesson->frames > 0)
-            usleep(lesson->frame_delay_us);
+        output_ansi(fb);
+        if (lesson->duration > 0.0f)
+            usleep((useconds_t)(1000000.0f / lesson->fps));
     }
 }
 
-static void run_ppm(const lesson_t *lesson)
+/*
+统一动画循环:
+- 静态课程(duration=0):只渲染 t=0 这一帧;
+- 动画课程:按 fps 把 [0, duration) 切成等间隔的时刻,
+  每个时刻调用一次 render,再把结果交给 output_frame.
+*/
+static void run_lesson(const lesson_t *lesson, output_mode_t mode)
 {
-    /* 输出目录统一放在 out/ 下,已被 .gitignore 忽略 */
-    mkdir("out", 0777);
+    /* PPM 输出目录统一放在 out/ 下,已被 .gitignore 忽略 */
+    if (mode == OUTPUT_PPM)
+        mkdir("out", 0777);
 
-    int frame_count = lesson->frames > 0 ? lesson->frames : 1;
-    for (int frame = 0; frame < frame_count; frame++)
+    if (lesson->duration <= 0.0f)
     {
         framebuffer_t fb;
         fb_clear(&fb);
-        if (lesson->render(&fb, frame) != 0)
+        if (lesson->render(&fb, 0.0f) == 0)
+            output_frame(lesson, &fb, 0, mode);
+        return;
+    }
+
+    /* 总帧数 = 时长 * 帧率;dt 是"每两帧之间隔多少秒" */
+    int total_frames = (int)(lesson->duration * lesson->fps + 0.5f);
+    float dt = 1.0f / lesson->fps;
+    for (int frame_index = 0; frame_index < total_frames; frame_index++)
+    {
+        float time_seconds = (float)frame_index * dt;
+
+        framebuffer_t fb;
+        fb_clear(&fb);
+        if (lesson->render(&fb, time_seconds) != 0)
             break;
-
-        char path[256];
-        if (lesson->frames > 0)
-            snprintf(path, sizeof(path), "out/%s_%04d.ppm", lesson->id, frame);
-        else
-            snprintf(path, sizeof(path), "out/%s.ppm", lesson->id);
-
-        output_ppm(&fb, path);
-        printf("已写出 %s\n", path);
+        output_frame(lesson, &fb, frame_index, mode);
     }
 }
 
@@ -60,7 +92,7 @@ int main(int argc, char **argv)
     /* 无参数:运行默认课程 */
     if (argc < 2)
     {
-        run_ansi(lesson_default());
+        run_lesson(lesson_default(), OUTPUT_ANSI);
         return 0;
     }
 
@@ -82,9 +114,9 @@ int main(int argc, char **argv)
 
     /* 第二个参数写 ppm:从内存帧缓冲输出 PPM 文件 */
     if (argc >= 3 && strcmp(argv[2], "ppm") == 0)
-        run_ppm(lesson);
+        run_lesson(lesson, OUTPUT_PPM);
     else
-        run_ansi(lesson);
+        run_lesson(lesson, OUTPUT_ANSI);
 
     return 0;
 }

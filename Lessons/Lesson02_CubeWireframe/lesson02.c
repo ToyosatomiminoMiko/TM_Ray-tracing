@@ -10,7 +10,7 @@
 /*
 第 2 课:立方体线框动画
 用模型矩阵(缩放 -> 旋转 -> 平移)变换 8 个顶点,
-再用 Bresenham 直线把 12 条棱画进内存帧缓冲。
+再用 Bresenham 直线把 12 条棱画进内存帧缓冲.
 */
 static const box b1 = {
     {-1, -1, -1, 1},
@@ -31,14 +31,17 @@ static void line(framebuffer_t *fb, float x0, float y0, float x1, float y1, pixe
         (int)(x1 + W / 2), (int)(y1 + H / 2), color);
 }
 
-int lesson02_render(framebuffer_t *fb, int frame)
+int lesson02_render(framebuffer_t *fb, float time_seconds)
 {
     /* 变换结果储存 */
     box b2;
     Matrix_4x4 S, R, T;
 
-    /* 每帧旋转 6 度,总共 60 帧转完一圈 */
-    float r = DEG2RAD * (float)(frame * 6);
+    /*
+    时间驱动动画:每秒转一整圈(360 度).
+    60fps 时每帧自然相差 6 度;以后改帧率,转圈速度也不会变.
+    */
+    float r = DEG2RAD * (time_seconds * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
     Matrix_4x4 model = {

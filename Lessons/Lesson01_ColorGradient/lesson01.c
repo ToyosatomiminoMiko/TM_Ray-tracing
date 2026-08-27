@@ -4,11 +4,11 @@
 
 /*
 第 1 课:颜色渐变
-把每个像素对应的光线方向映射成颜色,理解"方向 -> 颜色"。
+把每个像素对应的光线方向映射成颜色,理解"方向 -> 颜色".
 */
-int lesson01_render(framebuffer_t *fb, int frame)
+int lesson01_render(framebuffer_t *fb, float time_seconds)
 {
-    (void)frame;
+    (void)time_seconds; /* 静态课程:无论哪个时刻,画面都一样 */
 
     /* 遍历每一行(从上到下) */
     for (int j = 0; j < H; j++)
