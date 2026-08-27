@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 /*
-内存帧缓冲:所有课程统一"先渲染到内存,再输出"。
-终端动画和 PPM 文件都从这里的像素数据读取,不再允许直接写文件。
+内存帧缓冲:所有课程统一"先渲染到内存,再输出".
+终端动画和 PPM 文件都从这里的像素数据读取,不再允许直接写文件.
 */
 
 /* 分辨率:160*80 */
@@ -50,7 +50,7 @@ pixel_color_t fb_get_pixel(const framebuffer_t *fb, int x, int y);
 /*
 Bresenham 直线算法:
 用整数误差增量决定每一步是走 x 还是走 y,
-避免浮点运算和斜率除零,适合像素网格画线。
+避免浮点运算和斜率除零,适合像素网格画线.
 */
 void fb_draw_line(framebuffer_t *fb, int x1, int y1, int x2, int y2, pixel_color_t color);
 

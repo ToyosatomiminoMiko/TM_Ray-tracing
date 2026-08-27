@@ -5,8 +5,8 @@
 
 /*
 4x4 齐次矩阵,用于 3D 变换:
-平移、旋转、缩放、透视投影、观察矩阵。
-所有函数都是纯函数:只修改 result/homogeneous 这个输出参数。
+平移/旋转/缩放/透视投影/观察矩阵.
+所有函数都是纯函数:只修改 result/homogeneous 这个输出参数.
 */
 typedef float Matrix_4x4[4][4];
 typedef float Vector_4[4];
@@ -18,7 +18,7 @@ void matrix_identity_4x4(Matrix_4x4 m);
 /*
 矩阵乘法 C = A * B
 c[i][j] = Σ(k=0..3) a[i][k] * b[k][j]
-注意:矩阵乘法不满足交换律,A*B 表示"先做 B,再做 A"。
+注意:矩阵乘法不满足交换律,A*B 表示"先做 B,再做 A".
 */
 void matrix_multiply_4x4(Matrix_4x4 result, const Matrix_4x4 a, const Matrix_4x4 b);
 
@@ -88,7 +88,7 @@ void perspective_4x4(Matrix_4x4 m, float fov_radians, float aspect, float near, 
 
 /*
 观察矩阵 LookAt:
-根据眼睛位置、注视点和上方向构造相机坐标系。
+根据眼睛位置/注视点和上方向构造相机坐标系.
 f = normalize(center-eye)
 s = normalize(f × up)
 u = s × f

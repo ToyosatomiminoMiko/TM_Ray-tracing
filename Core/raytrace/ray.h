@@ -4,8 +4,8 @@
 #include "vec3.h"
 
 /*
-光线:一个起点 O 加一个方向 D(通常已经归一化)。
-参数方程:P(t) = O + t*D,t 是沿光线的距离。
+光线:一个起点 O 加一个方向 D(通常已经归一化).
+参数方程:P(t) = O + t*D,t 是沿光线的距离.
 */
 typedef struct
 {
@@ -39,7 +39,7 @@ Vector_3 ray_direction_fov(int i, int j, int w, int h, float fov);
 /*
 子像素采样方向(超采样/抗锯齿用):
 同样把 (i,j) 映射到 NDC,但像素内位置由 (ox,oy)(0..1) 控制,
-例如 ox=0.5,oy=0.5 就是像素中心。
+例如 ox=0.5,oy=0.5 就是像素中心.
 */
 Vector_3 ray_direction_subpixel(int i, int j, int w, int h, float fov, float ox, float oy);
 

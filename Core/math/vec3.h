@@ -4,7 +4,7 @@
 /*
 三维向量 Vector_3
 本课程所有向量运算都写成"纯函数":
-只读参数、不修改全局状态、返回新值,方便教学与调试。
+只读参数/不修改全局状态/返回新值,方便教学与调试.
 */
 typedef struct
 {
@@ -23,7 +23,7 @@ Vector_3 vector3_scale(Vector_3 v, float s);
 /* 点积: a·b = ax*bx + ay*by + az*bz (结果是一个标量) */
 float vector3_dot(Vector_3 a, Vector_3 b);
 
-/* 叉积: a×b = (ay*bz-az*by, az*bx-ax*bz, ax*by-ay*bx) (结果是垂直于a、b的向量) */
+/* 叉积: a×b = (ay*bz-az*by, az*bx-ax*bz, ax*by-ay*bx) (结果是垂直于a/b的向量) */
 Vector_3 vector3_cross(Vector_3 a, Vector_3 b);
 
 /* 长度平方: |v|² = vx² + vy² + vz² (省一次开方,用于快速比较) */
@@ -43,7 +43,7 @@ Vector_3 vector3_lerp(Vector_3 a, Vector_3 b, float t);
 
 /*
 反射: r = d - 2*(d·n)*n
-前提是法线 n 已经归一化,常用于镜面反射方向。
+前提是法线 n 已经归一化,常用于镜面反射方向.
 */
 Vector_3 vector3_reflect(Vector_3 d, Vector_3 n);
 

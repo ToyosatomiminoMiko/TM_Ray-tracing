@@ -19,8 +19,8 @@ void output_ansi(const framebuffer_t *fb);
 
 /*
 把内存帧缓冲写入 PPM 文件(P3 纯文本格式):
-第一行 P3,第二行 宽 高,第三行 255,之后每行一个像素的 RGB。
-成功返回 0,失败返回 -1。
+第一行 P3,第二行 宽 高,第三行 255,之后每行一个像素的 RGB.
+成功返回 0,失败返回 -1.
 */
 int output_ppm(const framebuffer_t *fb, const char *path);
 
