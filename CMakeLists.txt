@@ -1,14 +1,24 @@
-# 2026.03.19.08:12
-cmake_minimum_required(VERSION 3.31)
-project(matrix C)
+# 2026.08.27 架构重构:Core 核心库 + Lessons 课程 + Docs 文档
+cmake_minimum_required(VERSION 3.16)
+project(ray_tracing C)
 
-include_directories(${PROJECT_SOURCE_DIR}/Inc)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_executable(matrix
-    Src/main.c
-    Src/vector.c
-    Src/matrix.c
-    Src/show.c
-    Src/ray_tracing.c
+file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS Core/*.c)
+file(GLOB_RECURSE LESSON_SOURCES CONFIGURE_DEPENDS Lessons/*.c)
+
+add_executable(ray_tracing
+    main.c
+    ${CORE_SOURCES}
+    ${LESSON_SOURCES}
 )
-target_link_libraries(matrix PRIVATE m)
+
+target_include_directories(ray_tracing PRIVATE
+    Core/math
+    Core/render
+    Core/raytrace
+    Lessons
+)
+
+target_link_libraries(ray_tracing PRIVATE m)
