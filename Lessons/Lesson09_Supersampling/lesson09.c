@@ -102,9 +102,10 @@ static vec3 sample_color(int i, int j, float ox, float oy)
         obj->albedo.z * brightness + spec};
 }
 
-int lesson09_render(framebuffer_t *fb, float time_seconds)
+int lesson09_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
-    (void)time_seconds; /* 静态课程 */
+    (void)frame_index; /* 静态课程:只渲染一帧 */
+    (void)frame_count;
 
     for (int j = 0; j < H; j++)
     {

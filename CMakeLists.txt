@@ -14,6 +14,8 @@ add_executable(ray_tracing
     ${LESSON_SOURCES}
 )
 
+find_package(Threads REQUIRED)
+
 target_include_directories(ray_tracing PRIVATE
     Core/math
     Core/render
@@ -21,4 +23,4 @@ target_include_directories(ray_tracing PRIVATE
     Lessons
 )
 
-target_link_libraries(ray_tracing PRIVATE m)
+target_link_libraries(ray_tracing PRIVATE m Threads::Threads)

@@ -160,9 +160,10 @@ static vec3 trace_color(Ray ray, int depth)
     return (vec3){t, t, 1.0f};
 }
 
-int lesson07_render(framebuffer_t *fb, float time_seconds)
+int lesson07_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
-    (void)time_seconds; /* 静态课程 */
+    (void)frame_index; /* 静态课程:只渲染一帧 */
+    (void)frame_count;
 
     vec3 origin = {0.0f, 0.0f, 0.0f};
     for (int j = 0; j < H; j++)

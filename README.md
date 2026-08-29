@@ -12,7 +12,7 @@ ray.sh               shell 入口:交互选课 + ffmpeg 视频编码
 Core/math            vec3/mat4:纯数学函数,注释带公式
 Core/render          内存帧缓冲 + PPM 输出(output_ansi 保留供终端调试)
 Core/raytrace        光线/球/三角形/平面求交
-Lessons/             每节课一个目录,Lesson01 到 Lesson09
+Lessons/             每节课一个目录,Lesson01 到 Lesson10(10 为支线)
 Docs/                理论和方法文档
 ```
 
@@ -21,7 +21,7 @@ Docs/                理论和方法文档
 ## 建议阅读顺序
 
 1. [main.c](main.c):统一渲染循环,理解"内存帧缓冲 -> 输出"的数据流;
-2. [Lessons/registry.c](Lessons/registry.c):课程注册表,理解动画时长/帧率怎么声明;
+2. [Lessons/registry.c](Lessons/registry.c):课程注册表,理解动画怎么声明(只标记是否动画,速度由全局设置控制,播放帧率由编码端决定);
 3. `Lessons/Lesson01_ColorGradient/`:第一课,最简单的"每像素一条光线";
 4. `Core/math/`、`Core/raytrace/`:用到哪个看哪个,注释里都带公式.
 
@@ -73,3 +73,8 @@ cmake --build .
 | lesson07 | 平面棋盘格 + 反射递归 |
 | lesson08 | 轨道相机 + 透视投影(动画) |
 | lesson09 | 超采样抗锯齿(左右对比) |
+| lesson10 | 多线程渲染(支线,左右对比单线程/多线程耗时) |
+
+动画是帧驱动的:所有动画课程共用全局 `ANIMATION_FRAMES`(默认 240 帧,
+60fps 下 4 秒一圈),画面由帧号决定;
+MP4 默认 60fps、GIF 固定 25fps 只是编码端的播放设置,不影响动画本身.

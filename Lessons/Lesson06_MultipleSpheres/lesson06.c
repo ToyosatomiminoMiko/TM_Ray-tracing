@@ -35,9 +35,10 @@ static const vec3 light_pos = {2.0f, 2.2f, -1.0f};
 static const float ambient_strength = 0.12f;
 static const float specular_strength = 0.8f;
 
-int lesson06_render(framebuffer_t *fb, float time_seconds)
+int lesson06_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
-    (void)time_seconds; /* 静态课程 */
+    (void)frame_index; /* 静态课程:只渲染一帧 */
+    (void)frame_count;
 
     vec3 origin = {0.0f, 0.0f, 0.0f};
 

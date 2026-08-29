@@ -3,6 +3,6 @@
 
 #include "framebuffer.h"
 
-int lesson09_render(framebuffer_t *fb, float time_seconds);
+int lesson09_render(framebuffer_t *fb, int frame_index, int frame_count);
 
 #endif /* LESSON09_H_ */

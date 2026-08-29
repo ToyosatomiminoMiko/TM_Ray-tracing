@@ -17,8 +17,16 @@
 由 output_frame 这个回调按模式决定.
 可用的输出只有 ppm / mp4 / gif.
 
+动画是"帧驱动"而不是"时间驱动":
+课程只标记自己是不是动画,循环帧数由全局 ANIMATION_FRAMES 统一决定,
+main 依次渲染第 0..ANIMATION_FRAMES-1 帧,
+渲染函数收到帧号,由帧号决定画面,和秒/帧率无关.
+所有动画课程共用同一个速度,想调快/调慢只改 lesson.h 里的 ANIMATION_FRAMES.
+播放帧率只属于编码端:MP4 默认 60fps,GIF 锁定 25fps,
+这两个数字由 ray.sh 决定,不会倒回来影响动画本身.
+
 新增两种面向 shell 的入口:
-- meta <lesson>:打印 "duration fps",供 shell 读取动画参数;
+- meta <lesson>:打印课程帧数,供 shell 读取动画参数;
 - <lesson> stream:把每一帧 PPM 连续写到 stdout,
   由 shell 管道直接送给 ffmpeg 生成 mp4/gif.
 */
@@ -39,7 +47,7 @@ static void output_frame(const lesson_t *lesson, const framebuffer_t *fb, int fr
     {
         /* 动画按帧号写序列文件,静态课程直接写单个文件 */
         char path[256];
-        if (lesson->duration > 0.0f)
+        if (lesson->animated)
             snprintf(path, sizeof(path), "out/%s_%04d.ppm", lesson->id, frame_index);
         else
             snprintf(path, sizeof(path), "out/%s.ppm", lesson->id);
@@ -72,9 +80,9 @@ static void print_progress(int done, int total)
 
 /*
 统一动画循环:
-- 静态课程(duration=0):只渲染 t=0 这一帧;
-- 动画课程:按 fps 把 [0, duration) 切成等间隔的时刻,
-  每个时刻调用一次 render,再把结果交给 output_frame.
+- 静态课程(animated=0):只渲染第 0 帧;
+- 动画课程:从第 0 帧渲染到第 ANIMATION_FRAMES-1 帧,
+  每帧调用一次 render(fb, frame_index, ANIMATION_FRAMES),再把结果交给 output_frame.
 */
 static void run_lesson(const lesson_t *lesson, output_mode_t mode)
 {
@@ -82,29 +90,26 @@ static void run_lesson(const lesson_t *lesson, output_mode_t mode)
     if (mode == OUTPUT_PPM)
         mkdir("out", 0777);
 
-    if (lesson->duration <= 0.0f)
+    if (!lesson->animated)
     {
         framebuffer_t fb;
         fb_clear(&fb);
-        if (lesson->render(&fb, 0.0f) == 0)
+        if (lesson->render(&fb, 0, 1) == 0)
             output_frame(lesson, &fb, 0, mode);
         return;
     }
 
-    /* 总帧数 = 时长 * 帧率;dt 是"每两帧之间隔多少秒" */
-    int total_frames = (int)(lesson->duration * lesson->fps + 0.5f);
-    float dt = 1.0f / lesson->fps;
+    /* 动画循环帧数来自全局 ANIMATION_FRAMES,所有动画课程共用同一个速度 */
+    int total_frames = ANIMATION_FRAMES;
 
     if (mode == OUTPUT_PPM_STREAM)
         fprintf(stderr, "渲染 %s:共 %d 帧,正在写入标准输出...\n", lesson->id, total_frames);
 
     for (int frame_index = 0; frame_index < total_frames; frame_index++)
     {
-        float time_seconds = (float)frame_index * dt;
-
         framebuffer_t fb;
         fb_clear(&fb);
-        if (lesson->render(&fb, time_seconds) != 0)
+        if (lesson->render(&fb, frame_index, total_frames) != 0)
             break;
         output_frame(lesson, &fb, frame_index, mode);
 
@@ -148,7 +153,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "找不到课程 %s\n", argv[2]);
             return 1;
         }
-        printf("%g %g\n", lesson->duration, lesson->fps);
+        printf("%d\n", lesson->animated ? ANIMATION_FRAMES : 0);
         return 0;
     }
 

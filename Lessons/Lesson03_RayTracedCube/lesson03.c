@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "lesson.h"
 #include "mat4.h"
 #include "triangle.h"
 
@@ -23,7 +24,7 @@ static const box b1 = {
     {1, 1, -1, 1},
     {1, 1, 1, 1}};
 
-int lesson03_render(framebuffer_t *fb, float time_seconds)
+int lesson03_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
     /* 12 个三角形索引 */
     const uint8_t tri_indices[12][3] = {
@@ -45,8 +46,9 @@ int lesson03_render(framebuffer_t *fb, float time_seconds)
     vec3 origin = {0.0f, 0.0f, 0.0f};
     mat4 S, R, T;
 
-    /* 时间驱动动画:每秒转一整圈(360 度),与帧率无关 */
-    float r = DEG2RAD * (time_seconds * 360.0f);
+    /* 帧驱动动画:一整个循环转一整圈,角度只由帧号决定,与帧率无关 */
+    float u = lesson_loop_progress(frame_index, frame_count);
+    float r = DEG2RAD * (u * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
     mat4 model = {

@@ -6,6 +6,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+# 帧率只属于编码端:C 端动画只按帧数渲染,不关心播放帧率.
+# MP4 默认 60fps;GIF 格式限制锁 25fps,编码时用 fps=25 从 60fps 帧流里取帧,
+# 循环时长 = 帧数 / 60,动画画面本身不受帧率影响.
+MP4_FPS=60
+GIF_FPS=25
+
 if [[ -x ./ray_tracing ]]; then
     RAY_BIN=./ray_tracing
 elif [[ -x ./build/ray_tracing ]]; then
@@ -35,17 +41,21 @@ require_ffmpeg() {
 
 # 把 C 渲染出的 PPM 帧流直接管道给 ffmpeg,不落中间文件.
 encode() {
-    local id=$1 fmt=$2 meta duration fps
+    local id=$1 fmt=$2 meta frames stream_fps gif_fps
 
     if ! meta=$("$RAY_BIN" meta "$id" 2>/dev/null); then
         echo "找不到课程 $id" >&2
         exit 1
     fi
-    read -r duration fps <<<"$meta"
+    frames=$meta
 
-    if ! awk -v d="$duration" 'BEGIN{exit !(d>0)}'; then
+    if (( frames <= 0 )); then
         echo "提示:$id 是静态课程,只会生成单帧画面." >&2
-        fps=1
+        stream_fps=1
+        gif_fps=1
+    else
+        stream_fps=$MP4_FPS
+        gif_fps=$GIF_FPS
     fi
 
     mkdir -p out
@@ -54,7 +64,7 @@ encode() {
             echo "正在生成 out/$id.mp4 ..."
             "$RAY_BIN" "$id" stream |
                 ffmpeg -y -loglevel warning \
-                    -f image2pipe -framerate "$fps" -vcodec ppm -i - \
+                    -f image2pipe -framerate "$stream_fps" -vcodec ppm -i - \
                     -c:v libx264 -preset medium -crf 18 \
                     -pix_fmt yuv420p -movflags +faststart \
                     "out/$id.mp4"
@@ -63,8 +73,8 @@ encode() {
             echo "正在生成 out/$id.gif ..."
             "$RAY_BIN" "$id" stream |
                 ffmpeg -y -loglevel warning \
-                    -f image2pipe -framerate "$fps" -vcodec ppm -i - \
-                    -vf "fps=$fps,split[s0][s1];[s0]palettegen=stats_mode=full[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5" \
+                    -f image2pipe -framerate "$stream_fps" -vcodec ppm -i - \
+                    -vf "fps=$gif_fps,split[s0][s1];[s0]palettegen=stats_mode=full[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5" \
                     -loop 0 \
                     "out/$id.gif"
             ;;

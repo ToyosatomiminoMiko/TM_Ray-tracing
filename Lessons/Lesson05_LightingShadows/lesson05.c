@@ -10,9 +10,10 @@
 3. 漫反射光照(环境光保底 + N·L)
 画面只渲染进内存帧缓冲,不再直接写文件.
 */
-int lesson05_render(framebuffer_t *fb, float time_seconds)
+int lesson05_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
-    (void)time_seconds; /* 静态课程 */
+    (void)frame_index; /* 静态课程:只渲染一帧 */
+    (void)frame_count;
 
     /* --- 场景设置 --- */
     /* 1. 球体:放在正前方,红色 */

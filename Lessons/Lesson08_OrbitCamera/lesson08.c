@@ -2,13 +2,13 @@
 
 #include <math.h>
 
+#include "lesson.h"
 #include "mat4.h"
 #include "plane.h"
 #include "sphere.h"
 
 #define DEG2RAD (3.14159265358979323846f / 180.0f)
 #define FOV (60.0f * DEG2RAD) /* 垂直视场角 60 度 */
-#define ORBIT_SECONDS 3.0f /* 相机绕一整圈需要的秒数 */
 
 /*
 第 8 课:轨道相机 + 透视
@@ -139,13 +139,14 @@ static vec3 trace_color(Ray ray)
     return (vec3){t, t, 1.0f};
 }
 
-int lesson08_render(framebuffer_t *fb, float time_seconds)
+int lesson08_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
     /*
-    时间驱动动画:3 秒绕 Y 轴转一整圈.
-    帧率由 main 决定,这里只关心"现在该转到哪个角度".
+    帧驱动动画:一整个循环 = frame_count 帧,相机绕 Y 轴转一整圈.
+    角度只由帧号决定,和秒/帧率无关;首尾相接,循环播放无跳变.
     */
-    float angle = 2.0f * (float)M_PI * time_seconds / ORBIT_SECONDS;
+    float u = lesson_loop_progress(frame_index, frame_count);
+    float angle = 2.0f * (float)M_PI * u;
     vec3 eye = {5.0f * cosf(angle), 1.2f, 5.0f * sinf(angle)};
     vec3 center = {0.0f, 0.0f, -1.0f};
     vec3 up = {0.0f, 1.0f, 0.0f};

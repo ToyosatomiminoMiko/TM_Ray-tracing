@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "lesson.h"
 #include "mat4.h"
 
 #define DEG2RAD (3.14159265358979323846f / 180.0f)
@@ -31,17 +32,19 @@ static void line(framebuffer_t *fb, float x0, float y0, float x1, float y1, pixe
         (int)(x1 + W / 2), (int)(y1 + H / 2), color);
 }
 
-int lesson02_render(framebuffer_t *fb, float time_seconds)
+int lesson02_render(framebuffer_t *fb, int frame_index, int frame_count)
 {
     /* 变换结果储存 */
     box b2;
     mat4 S, R, T;
 
     /*
-    时间驱动动画:每秒转一整圈(360 度).
-    60fps 时每帧自然相差 6 度;以后改帧率,转圈速度也不会变.
+    帧驱动动画:一整个循环 = frame_count 帧,每帧走 360/frame_count 度.
+    第 0 帧从 0 度开始,最后一帧是回到 0 度前一刻,首尾无缝衔接.
+    播放帧率(60fps/25fps)只影响"播多快",不影响每帧画面.
     */
-    float r = DEG2RAD * (time_seconds * 360.0f);
+    float u = lesson_loop_progress(frame_index, frame_count);
+    float r = DEG2RAD * (u * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
     mat4 model = {
@@ -49,7 +52,7 @@ int lesson02_render(framebuffer_t *fb, float time_seconds)
         {0, 1, 0, 0},
         {0, 0, 1, 0},
         {0, 0, 0, 1}};
-    scale_3d(S, 15, 15, 15);    /* 缩放 */
+    scale_3d(S, 200, 200, 200);    /* 高分辨率保持200缩放 */
     rotate_zyx_3d(R, r, -r, r); /* 旋转 绕自身轴 */
     translate_3d(T, 0, 0, -50); /* 平移到相机前方 */
 
