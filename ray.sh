@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 用户交互层:选课菜单、终端播放、管道给 ffmpeg 生成 mp4/gif.
+# 用户交互层:选课菜单、管道给 ffmpeg 生成 mp4/gif.
+# 输出方式只提供 ppm / mp4 / gif 三种,不提供终端播放.
 # C 程序只负责渲染,所有"问用户要什么"的事情都在这里.
 set -euo pipefail
 
@@ -19,7 +20,6 @@ usage() {
 用法:
   ./ray.sh                  交互式选课菜单
   ./ray.sh list             列出课程
-  ./ray.sh <lesson>         终端播放/显示
   ./ray.sh <lesson> mp4     渲染并通过管道编码 out/<lesson>.mp4
   ./ray.sh <lesson> gif     渲染并通过管道编码 out/<lesson>.gif
   ./ray.sh <lesson> ppm     保存 PPM 到 out/(静态课单帧,动画课帧序列)
@@ -103,18 +103,17 @@ interactive() {
 
         id=${ids[$((REPLY - 1))]}
         echo "已选择:$id"
-        PS3="请选择输出方式(输入 5 返回选课): "
-        select fmt in "终端播放/显示" "生成 mp4" "生成 gif" "保存 ppm" "返回选课"; do
+        PS3="请选择输出方式(输入 4 返回选课): "
+        select fmt in "生成 mp4" "生成 gif" "保存 ppm" "返回选课"; do
             if [[ -z $REPLY ]]; then
                 echo "已取消"
                 exit 0
             fi
             case $REPLY in
-                1) "$RAY_BIN" "$id"; return 0 ;;
-                2) require_ffmpeg; encode "$id" mp4; return 0 ;;
-                3) require_ffmpeg; encode "$id" gif; return 0 ;;
-                4) "$RAY_BIN" "$id" ppm; return 0 ;;
-                5) break ;;
+                1) require_ffmpeg; encode "$id" mp4; return 0 ;;
+                2) require_ffmpeg; encode "$id" gif; return 0 ;;
+                3) "$RAY_BIN" "$id" ppm; return 0 ;;
+                4) break ;;
                 *) echo "无效选择,请重试" ;;
             esac
         done
@@ -131,7 +130,6 @@ case "${1:-}" in
         case "$fmt" in
             mp4 | gif) require_ffmpeg; encode "$id" "$fmt" ;;
             ppm) "$RAY_BIN" "$id" ppm ;;
-            ansi | "") "$RAY_BIN" "$id" ;;
             *) usage; exit 1 ;;
         esac
         ;;

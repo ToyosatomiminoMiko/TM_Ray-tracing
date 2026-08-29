@@ -2,7 +2,7 @@
 
 光线追踪教学课程(C 语言).
 课程按学习顺序组织,所有渲染统一先写入内存帧缓冲,
-再从内存输出为终端动画或 PPM 文件.
+再导出为 PPM 文件,或把 PPM 帧流编码为 mp4/gif.
 
 ## 目录结构
 
@@ -10,7 +10,7 @@
 main.c               课程入口与输出模式控制
 ray.sh               shell 入口:交互选课 + ffmpeg 视频编码
 Core/math            vec3/mat4:纯数学函数,注释带公式
-Core/render          内存帧缓冲 + 终端/PPM 输出
+Core/render          内存帧缓冲 + PPM 输出(output_ansi 保留供终端调试)
 Core/raytrace        光线/球/三角形/平面求交
 Lessons/             每节课一个目录,Lesson01 到 Lesson09
 Docs/                理论和方法文档
@@ -44,11 +44,13 @@ cmake --build .
 ```sh
 ./ray.sh                         # 交互式选课菜单
 ./ray.sh list                    # 列出所有课程
-./ray.sh lesson08                # 终端播放动画
 ./ray.sh lesson08 mp4            # 逐帧管道给 ffmpeg,输出 out/lesson08.mp4
 ./ray.sh lesson08 gif            # 逐帧管道给 ffmpeg,输出 out/lesson08.gif
 ./ray.sh lesson05 ppm            # 渲染到内存后输出 out/lesson05.ppm
 ```
+
+命令行与交互菜单只提供 ppm / mp4 / gif 三种输出;
+`output_ansi` 函数保留在 `Core/render/output.c` 中,仅调试用.
 
 动画编码不落中间文件:C 程序把每一帧 PPM 写到标准输出,
 `ray.sh` 用管道直接交给 ffmpeg 生成 mp4/gif.

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "lesson.h"
 #include "output.h"
@@ -10,12 +9,13 @@
 统一渲染入口:
 1. 每帧先清空内存帧缓冲
 2. 调用课程渲染函数,把画面画进内存
-3. 按模式从内存输出:终端 ANSI 动画,或 PPM 文件
+3. 按模式从内存输出:PPM 文件,或连续 PPM 帧流(管道给 ffmpeg)
 课程内部不允许直接写文件,保证"统一先入内存".
 
-动画由统一循环驱动,不再分成"终端循环"和"文件循环"两套代码:
-循环只负责"在什么时刻渲染",真正把画面交给屏幕还是文件,
+动画由统一循环驱动,不再按输出方式拆成两套循环:
+循环只负责"在什么时刻渲染",真正把画面交给文件还是管道,
 由 output_frame 这个回调按模式决定.
+可用的输出只有 ppm / mp4 / gif.
 
 新增两种面向 shell 的入口:
 - meta <lesson>:打印 "duration fps",供 shell 读取动画参数;
@@ -25,13 +25,12 @@
 
 typedef enum
 {
-    OUTPUT_ANSI,
     OUTPUT_PPM,
     OUTPUT_PPM_STREAM
 } output_mode_t;
 
 /*
-输出回调:把"内存里已经画好的一帧"交给终端或 PPM 文件.
+输出回调:把"内存里已经画好的一帧"交给 PPM 文件或 PPM 帧流.
 frame_index 只用于给动画帧命名(lessonXX_0000.ppm),不参与动画逻辑.
 */
 static void output_frame(const lesson_t *lesson, const framebuffer_t *fb, int frame_index, output_mode_t mode)
@@ -52,19 +51,11 @@ static void output_frame(const lesson_t *lesson, const framebuffer_t *fb, int fr
         /* 帧流模式:纯数据走 stdout,进度提示走 stderr,不污染管道 */
         output_ppm_stream(fb);
     }
-    else
-    {
-        /* 终端动画:先清屏再整幅打印;按帧率睡一觉,控制播放速度 */
-        output_clear_screen();
-        output_ansi(fb);
-        if (lesson->duration > 0.0f)
-            usleep((useconds_t)(1000000.0f / lesson->fps));
-    }
 }
 
 /*
 渲染进度条:输出到 stderr,不占用 stdout.
-终端播放本身就能看到画面,不需要进度条;帧流/写文件时才有用.
+stdout 只留给 PPM 数据,进度提示全部走 stderr.
 */
 static void print_progress(int done, int total)
 {
@@ -127,11 +118,12 @@ static void run_lesson(const lesson_t *lesson, output_mode_t mode)
 
 int main(int argc, char **argv)
 {
-    /* 无参数:运行默认课程 */
+    /* 无参数:提示用法 */
     if (argc < 2)
     {
-        run_lesson(lesson_default(), OUTPUT_ANSI);
-        return 0;
+        fprintf(stderr, "用法: ray_tracing <lesson> ppm|stream\n");
+        fprintf(stderr, "交互式使用请运行 ./ray.sh\n");
+        return 1;
     }
 
     /* list:列出所有课程 */
@@ -175,7 +167,10 @@ int main(int argc, char **argv)
     else if (argc >= 3 && strcmp(argv[2], "stream") == 0)
         run_lesson(lesson, OUTPUT_PPM_STREAM);
     else
-        run_lesson(lesson, OUTPUT_ANSI);
+    {
+        fprintf(stderr, "用法: ray_tracing <lesson> ppm|stream\n");
+        return 1;
+    }
 
     return 0;
 }

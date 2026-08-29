@@ -27,6 +27,7 @@ static int output_ppm_to(FILE *fp, const framebuffer_t *fb)
     return fflush(fp) == EOF ? -1 : 0;
 }
 
+// [debug only]
 void output_ansi(const framebuffer_t *fb)
 {
     for (int y = 0; y < H; y++)
