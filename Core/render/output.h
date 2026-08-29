@@ -28,6 +28,8 @@ int output_ppm(const framebuffer_t *fb, const char *path);
 /*
 把内存帧缓冲以 PPM 格式写到 stdout(连续调用就是连续帧流),
 典型用法是管道给 ffmpeg:ray_tracing lesson08 stream | ffmpeg ...
+帧流使用二进制 P6(每帧固定大小),避免 ffmpeg 对文本 P3 长流的错位问题;
+PPM 文件输出则保持 P3 文本,方便直接阅读.
 成功返回 0,失败返回 -1.
 */
 int output_ppm_stream(const framebuffer_t *fb);

@@ -27,7 +27,7 @@ main 依次渲染第 0..ANIMATION_FRAMES-1 帧,
 
 新增两种面向 shell 的入口:
 - meta <lesson>:打印课程帧数,供 shell 读取动画参数;
-- <lesson> stream:把每一帧 PPM 连续写到 stdout,
+- <lesson> stream:把每一帧 PPM(P6 二进制)连续写到 stdout,
   由 shell 管道直接送给 ffmpeg 生成 mp4/gif.
 */
 
