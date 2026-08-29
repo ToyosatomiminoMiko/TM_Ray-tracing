@@ -8,6 +8,7 @@
 
 ```text
 main.c               课程入口与输出模式控制
+ray.sh               shell 入口:交互选课 + ffmpeg 视频编码
 Core/math            vec3/mat4:纯数学函数,注释带公式
 Core/render          内存帧缓冲 + 终端/PPM 输出
 Core/raytrace        光线/球/三角形/平面求交
@@ -41,17 +42,20 @@ cmake --build .
 ## 运行
 
 ```sh
-./build/ray_tracing              # 默认运行最后一课(抗锯齿)
-./build/ray_tracing list         # 列出所有课程
-./build/ray_tracing lesson05     # 终端动画(静态课程显示一帧)
-./build/ray_tracing lesson05 ppm # 渲染到内存后输出 out/lesson05.ppm
+./ray.sh                         # 交互式选课菜单
+./ray.sh list                    # 列出所有课程
+./ray.sh lesson08                # 终端播放动画
+./ray.sh lesson08 mp4            # 逐帧管道给 ffmpeg,输出 out/lesson08.mp4
+./ray.sh lesson08 gif            # 逐帧管道给 ffmpeg,输出 out/lesson08.gif
+./ray.sh lesson05 ppm            # 渲染到内存后输出 out/lesson05.ppm
 ```
 
-动画课程加 `ppm` 参数会按帧输出 `out/lessonXX_0000.ppm` 序列,
-可用 ImageMagick 合成 GIF:
+动画编码不落中间文件:C 程序把每一帧 PPM 写到标准输出,
+`ray.sh` 用管道直接交给 ffmpeg 生成 mp4/gif.
+底层二进制也保留了 `stream` 模式,可自行接任意管道:
 
 ```sh
-magick -delay 5 out/lesson08_*.ppm out/lesson08.gif
+./build/ray_tracing lesson08 stream | ffmpeg -f image2pipe -vcodec ppm -i - out/lesson08.mp4
 ```
 
 ## 课程表

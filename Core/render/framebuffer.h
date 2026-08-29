@@ -8,9 +8,9 @@
 终端动画和 PPM 文件都从这里的像素数据读取,不再允许直接写文件.
 */
 
-/* 分辨率:160*80 */
-#define W (int)160
-#define H (int)80
+/* 分辨率 */
+#define W (int)1600
+#define H (int)900
 
 /* 一个像素:32 位里低 24 位存放 0xRRGGBB */
 typedef uint32_t pixel_color_t;
@@ -54,4 +54,4 @@ Bresenham 直线算法:
 */
 void fb_draw_line(framebuffer_t *fb, int x1, int y1, int x2, int y2, pixel_color_t color);
 
-#endif /* FRAMEBUFFER_H_ */
+#endif /*FRAMEBUFFER_H_*/
