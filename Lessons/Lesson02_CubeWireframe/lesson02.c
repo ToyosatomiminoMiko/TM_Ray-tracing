@@ -35,7 +35,7 @@ int lesson02_render(framebuffer_t *fb, float time_seconds)
 {
     /* 变换结果储存 */
     box b2;
-    Matrix_4x4 S, R, T;
+    mat4 S, R, T;
 
     /*
     时间驱动动画:每秒转一整圈(360 度).
@@ -44,7 +44,7 @@ int lesson02_render(framebuffer_t *fb, float time_seconds)
     float r = DEG2RAD * (time_seconds * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
-    Matrix_4x4 model = {
+    mat4 model = {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
         {0, 0, 1, 0},
@@ -61,9 +61,9 @@ int lesson02_render(framebuffer_t *fb, float time_seconds)
     /* 变换 8 个顶点 */
     for (int i = 0; i < 8; i++)
     {
-        Vector_4 temp_vec0 = {b1[i][0], b1[i][1], b1[i][2], 1};
+        vec4 temp_vec0 = {b1[i][0], b1[i][1], b1[i][2], 1};
         matrix_vector_multiply(temp_vec0, model, temp_vec0);
-        memcpy(b2[i], temp_vec0, sizeof(Vector_4));
+        memcpy(b2[i], temp_vec0, sizeof(vec4));
     }
 
     /* 底面边 - 白色 */

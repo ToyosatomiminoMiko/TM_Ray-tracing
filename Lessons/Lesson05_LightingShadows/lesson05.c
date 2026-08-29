@@ -17,19 +17,19 @@ int lesson05_render(framebuffer_t *fb, float time_seconds)
     /* --- 场景设置 --- */
     /* 1. 球体:放在正前方,红色 */
     Sphere sphere = {{0.0f, 0.0f, -3.0f}, 1.0f};
-    Vector_3 albedo = {1.0f, 0.2f, 0.2f};
+    vec3 albedo = {1.0f, 0.2f, 0.2f};
 
     /* 2. 点光源:放在右上方(观察者的视角) */
-    Vector_3 light_pos = {1.5f, 1.5f, -2.0f};
+    vec3 light_pos = {1.5f, 1.5f, -2.0f};
     float ambient_strength = 0.15f; /* 环境光(防止死黑) */
 
-    Vector_3 origin = {0.0f, 0.0f, 0.0f};
+    vec3 origin = {0.0f, 0.0f, 0.0f};
 
     for (int j = 0; j < H; j++)
     {
         for (int i = 0; i < W; i++)
         {
-            Vector_3 dir = ray_direction(i, j, W, H);
+            vec3 dir = ray_direction(i, j, W, H);
             Ray ray = {origin, dir};
 
             /* -------- 第一部分:主光线撞球 -------- */
@@ -39,18 +39,18 @@ int lesson05_render(framebuffer_t *fb, float time_seconds)
             if (t > 0)
             {
                 /* 1. 计算命中点 P */
-                Vector_3 P = ray_at(ray, t);
+                vec3 P = ray_at(ray, t);
 
                 /* 2. 计算法线 N(球心指向P,再归一化) */
-                Vector_3 N = sphere_normal_at(sphere, P);
+                vec3 N = sphere_normal_at(sphere, P);
 
                 /* -------- 第二部分:阴影判定 -------- */
                 /* 光源方向 L = (光源位置 - P) 归一化 */
-                Vector_3 L = vector3_normalize(vector3_sub(light_pos, P));
-                float dist_to_light = vector3_length(vector3_sub(light_pos, P));
+                vec3 L = vec3_normalize(vec3_sub(light_pos, P));
+                float dist_to_light = vec3_length(vec3_sub(light_pos, P));
 
                 /* [性能优化第1招:微小偏移] 防止阴影光线撞到自己脸上 */
-                Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+                vec3 shadow_origin = vec3_add(P, vec3_scale(N, 0.001f));
 
                 /* 发射阴影光线,判断是否被遮挡 */
                 /* [性能优化第2招:只算有没有挡,不算最近交点(提前退出)] */
@@ -63,7 +63,7 @@ int lesson05_render(framebuffer_t *fb, float time_seconds)
 
                 /* -------- 第三部分:漫反射光照 -------- */
                 /* 光线和法线的夹角越小越亮 */
-                float diff = vector3_dot(N, L);
+                float diff = vec3_dot(N, L);
                 if (diff < 0)
                     diff = 0; /* 光从背后打过来就是纯黑 */
 

@@ -11,6 +11,6 @@
 当 |D·n| 接近 0 时光线与平面平行,没有交点.
 返回 1 相交,0 不相交.
 */
-int intersect_plane(Ray ray, Vector_3 normal, Vector_3 point, float *t);
+int intersect_plane(Ray ray, vec3 normal, vec3 point, float *t);
 
 #endif /* PLANE_H_ */

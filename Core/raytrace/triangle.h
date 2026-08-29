@@ -13,10 +13,10 @@
 返回 1 相交,0 不相交;t 为距离,u,v 为重心坐标.
 */
 int ray_triangle_intersect(
-    Ray ray, Vector_3 V0, Vector_3 V1, Vector_3 V2,
+    Ray ray, vec3 V0, vec3 V1, vec3 V2,
     float *t, float *u, float *v);
 
 /* 三角形平面法线(叉积后归一化) */
-Vector_3 triangle_normal(Vector_3 V0, Vector_3 V1, Vector_3 V2);
+vec3 triangle_normal(vec3 V0, vec3 V1, vec3 V2);
 
 #endif /* TRIANGLE_H_ */

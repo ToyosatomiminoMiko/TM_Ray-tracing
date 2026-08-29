@@ -20,7 +20,7 @@
 typedef struct
 {
     Sphere sphere;
-    Vector_3 albedo;
+    vec3 albedo;
     float shininess;
 } SceneObject;
 
@@ -32,18 +32,18 @@ static const SceneObject objects[] = {
 };
 #define OBJECT_COUNT (int)(sizeof(objects) / sizeof(objects[0]))
 
-static const Vector_3 light_pos = {2.0f, 2.2f, 0.0f};
+static const vec3 light_pos = {2.0f, 2.2f, 0.0f};
 static const float ambient_strength = 0.12f;
 static const float specular_strength = 0.8f;
 static const float plane_y = -1.0f;
-static const Vector_3 plane_normal = {0.0f, 1.0f, 0.0f};
+static const vec3 plane_normal = {0.0f, 1.0f, 0.0f};
 
 /* 场景着色(球 + 地面):对一条光线找最近交点,再按命中物算光照 */
-static Vector_3 trace_color(Ray ray)
+static vec3 trace_color(Ray ray)
 {
     /* 先算地面,再算所有球,t 最小的才是"这束光线看见的表面" */
     float t_plane = 0.0f;
-    int hit_plane = intersect_plane(ray, plane_normal, (Vector_3){0.0f, plane_y, 0.0f}, &t_plane);
+    int hit_plane = intersect_plane(ray, plane_normal, (vec3){0.0f, plane_y, 0.0f}, &t_plane);
 
     int nearest = -1;
     float t_nearest = hit_plane ? t_plane : 1e30f;
@@ -57,7 +57,7 @@ static Vector_3 trace_color(Ray ray)
         }
     }
 
-    Vector_3 L, N, P;
+    vec3 L, N, P;
     float diff, dist_to_light;
     int occluded = 0;
 
@@ -66,13 +66,13 @@ static Vector_3 trace_color(Ray ray)
         const SceneObject *obj = &objects[nearest];
         P = ray_at(ray, t_nearest);
         N = sphere_normal_at(obj->sphere, P);
-        L = vector3_normalize(vector3_sub(light_pos, P));
-        dist_to_light = vector3_length(vector3_sub(light_pos, P));
-        diff = vector3_dot(N, L);
+        L = vec3_normalize(vec3_sub(light_pos, P));
+        dist_to_light = vec3_length(vec3_sub(light_pos, P));
+        diff = vec3_dot(N, L);
         if (diff < 0)
             diff = 0;
 
-        Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+        vec3 shadow_origin = vec3_add(P, vec3_scale(N, 0.001f));
         Ray shadow_ray = {shadow_origin, L};
         for (int k = 0; k < OBJECT_COUNT; k++)
         {
@@ -86,18 +86,18 @@ static Vector_3 trace_color(Ray ray)
         if (occluded)
             diff = 0;
 
-        Vector_3 V = vector3_normalize(vector3_scale(ray.dir, -1.0f));
-        Vector_3 half = vector3_normalize(vector3_add(L, V));
+        vec3 V = vec3_normalize(vec3_scale(ray.dir, -1.0f));
+        vec3 half = vec3_normalize(vec3_add(L, V));
         float spec = 0.0f;
         if (!occluded)
         {
-            float ndoth = vector3_dot(N, half);
+            float ndoth = vec3_dot(N, half);
             if (ndoth > 0)
                 spec = powf(ndoth, obj->shininess) * specular_strength;
         }
 
         float brightness = ambient_strength + (1.0f - ambient_strength) * diff;
-        return (Vector_3){
+        return (vec3){
             obj->albedo.x * brightness + spec,
             obj->albedo.y * brightness + spec,
             obj->albedo.z * brightness + spec};
@@ -110,13 +110,13 @@ static Vector_3 trace_color(Ray ray)
         float base = parity ? 0.15f : 0.65f;
 
         N = plane_normal;
-        L = vector3_normalize(vector3_sub(light_pos, P));
-        dist_to_light = vector3_length(vector3_sub(light_pos, P));
-        diff = vector3_dot(N, L);
+        L = vec3_normalize(vec3_sub(light_pos, P));
+        dist_to_light = vec3_length(vec3_sub(light_pos, P));
+        diff = vec3_dot(N, L);
         if (diff < 0)
             diff = 0;
 
-        Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+        vec3 shadow_origin = vec3_add(P, vec3_scale(N, 0.001f));
         Ray shadow_ray = {shadow_origin, L};
         for (int k = 0; k < OBJECT_COUNT; k++)
         {
@@ -131,12 +131,12 @@ static Vector_3 trace_color(Ray ray)
             diff = 0;
 
         float brightness = ambient_strength + (1.0f - ambient_strength) * diff;
-        return (Vector_3){base * brightness, base * brightness, base * brightness};
+        return (vec3){base * brightness, base * brightness, base * brightness};
     }
 
     /* 背景:渐变天空 */
     float t = (ray.dir.y + 1.0f) * 0.5f;
-    return (Vector_3){t, t, 1.0f};
+    return (vec3){t, t, 1.0f};
 }
 
 int lesson08_render(framebuffer_t *fb, float time_seconds)
@@ -146,12 +146,12 @@ int lesson08_render(framebuffer_t *fb, float time_seconds)
     帧率由 main 决定,这里只关心"现在该转到哪个角度".
     */
     float angle = 2.0f * (float)M_PI * time_seconds / ORBIT_SECONDS;
-    Vector_3 eye = {5.0f * cosf(angle), 1.2f, 5.0f * sinf(angle)};
-    Vector_3 center = {0.0f, 0.0f, -1.0f};
-    Vector_3 up = {0.0f, 1.0f, 0.0f};
+    vec3 eye = {5.0f * cosf(angle), 1.2f, 5.0f * sinf(angle)};
+    vec3 center = {0.0f, 0.0f, -1.0f};
+    vec3 up = {0.0f, 1.0f, 0.0f};
 
     /* LookAt 观察矩阵 + 转置(旋转部分求逆) */
-    Matrix_4x4 view, view_t;
+    mat4 view, view_t;
     look_at_4x4(view, eye, center, up);
     matrix_transpose_4x4(view_t, view);
 
@@ -168,12 +168,12 @@ int lesson08_render(framebuffer_t *fb, float time_seconds)
             float v = (j + 0.5f) / (float)H * 2.0f - 1.0f;
 
             /* 视空间光线方向(屏幕放在 z=-1) */
-            Vector_4 view_dir = {u * half_w, -v * half_h, -1.0f, 0.0f};
-            Vector_4 world_dir;
+            vec4 view_dir = {u * half_w, -v * half_h, -1.0f, 0.0f};
+            vec4 world_dir;
             matrix_vector_multiply(world_dir, view_t, view_dir);
 
-            Vector_3 dir = vector3_normalize((Vector_3){world_dir[0], world_dir[1], world_dir[2]});
-            Vector_3 color = trace_color((Ray){eye, dir});
+            vec3 dir = vec3_normalize((vec3){world_dir[0], world_dir[1], world_dir[2]});
+            vec3 color = trace_color((Ray){eye, dir});
             fb_set_pixel(fb, i, j, color_from_01(color.x, color.y, color.z));
         }
     }

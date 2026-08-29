@@ -16,7 +16,7 @@ int lesson01_render(framebuffer_t *fb, float time_seconds)
         for (int i = 0; i < W; i++)
         {
             /* 生成这束光的方向 */
-            Vector_3 dir = ray_direction(i, j, W, H);
+            vec3 dir = ray_direction(i, j, W, H);
             /* 把方向向量映射成 0..255 的颜色值 */
             /* 如果方向朝右(x正)红色多,朝上(y正)绿色多 */
             int r = (int)((dir.x + 1.0f) * 0.5f * 255.0f); /* 把 -1..1 映射到 0..255 */

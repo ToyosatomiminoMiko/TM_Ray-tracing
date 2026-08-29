@@ -14,7 +14,7 @@
 typedef struct
 {
     Sphere sphere;
-    Vector_3 albedo; /* 基础颜色 */
+    vec3 albedo; /* 基础颜色 */
     float shininess; /* 反光度,越大高光越集中 */
 } SceneObject;
 
@@ -31,7 +31,7 @@ static const SceneObject objects[] = {
 #define OBJECT_COUNT (int)(sizeof(objects) / sizeof(objects[0]))
 
 /* 点光源位置;ambient 兜底亮度;specular 高光强度上限 */
-static const Vector_3 light_pos = {2.0f, 2.2f, -1.0f};
+static const vec3 light_pos = {2.0f, 2.2f, -1.0f};
 static const float ambient_strength = 0.12f;
 static const float specular_strength = 0.8f;
 
@@ -39,13 +39,13 @@ int lesson06_render(framebuffer_t *fb, float time_seconds)
 {
     (void)time_seconds; /* 静态课程 */
 
-    Vector_3 origin = {0.0f, 0.0f, 0.0f};
+    vec3 origin = {0.0f, 0.0f, 0.0f};
 
     for (int j = 0; j < H; j++)
     {
         for (int i = 0; i < W; i++)
         {
-            Vector_3 dir = ray_direction(i, j, W, H);
+            vec3 dir = ray_direction(i, j, W, H);
             Ray ray = {origin, dir};
 
             /* 找到最近的球:t_nearest 初始为"无穷大",保证第一次命中必然更近 */
@@ -61,31 +61,31 @@ int lesson06_render(framebuffer_t *fb, float time_seconds)
                 }
             }
 
-            Vector_3 color;
+            vec3 color;
             if (nearest >= 0)
             {
                 const SceneObject *obj = &objects[nearest];
 
                 /* 命中点与法线 */
-                Vector_3 P = ray_at(ray, t_nearest);
-                Vector_3 N = sphere_normal_at(obj->sphere, P);
+                vec3 P = ray_at(ray, t_nearest);
+                vec3 N = sphere_normal_at(obj->sphere, P);
 
                 /* 光源方向 L(命中点指向灯)与视线方向 V(命中点指向相机) */
-                Vector_3 L = vector3_normalize(vector3_sub(light_pos, P));
-                Vector_3 V = vector3_normalize(vector3_sub(origin, P));
+                vec3 L = vec3_normalize(vec3_sub(light_pos, P));
+                vec3 V = vec3_normalize(vec3_sub(origin, P));
                 /* 半程向量 H = normalize(L + V) */
-                Vector_3 half = vector3_normalize(vector3_add(L, V));
+                vec3 half = vec3_normalize(vec3_add(L, V));
 
                 /* 漫反射系数:法线与光线夹角越小越亮,背光取 0 */
-                float diff = vector3_dot(N, L);
+                float diff = vec3_dot(N, L);
                 if (diff < 0)
                     diff = 0;
 
                 /* 阴影判定:检查所有球体是否挡住光源 */
                 float in_shadow = 0.0f;
-                Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+                vec3 shadow_origin = vec3_add(P, vec3_scale(N, 0.001f));
                 Ray shadow_ray = {shadow_origin, L};
-                float dist_to_light = vector3_length(vector3_sub(light_pos, P));
+                float dist_to_light = vec3_length(vec3_sub(light_pos, P));
                 for (int k = 0; k < OBJECT_COUNT; k++)
                 {
                     float ts = intersect_sphere_fast(shadow_ray, objects[k].sphere);
@@ -103,7 +103,7 @@ int lesson06_render(framebuffer_t *fb, float time_seconds)
                 float spec = 0.0f;
                 if (in_shadow < 0.5f)
                 {
-                    float ndoth = vector3_dot(N, half);
+                    float ndoth = vec3_dot(N, half);
                     if (ndoth > 0)
                         spec = powf(ndoth, obj->shininess) * specular_strength;
                 }
@@ -118,7 +118,7 @@ int lesson06_render(framebuffer_t *fb, float time_seconds)
             {
                 /* 背景色(渐变天空) */
                 float t = (dir.y + 1.0f) * 0.5f;
-                color = (Vector_3){t, t, 1.0f};
+                color = (vec3){t, t, 1.0f};
             }
 
             fb_set_pixel(fb, i, j, color_from_01(color.x, color.y, color.z));

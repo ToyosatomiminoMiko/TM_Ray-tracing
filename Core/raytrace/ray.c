@@ -2,18 +2,18 @@
 
 #include <math.h>
 
-Vector_3 ray_at(Ray ray, float t)
+vec3 ray_at(Ray ray, float t)
 {
-    return vector3_add(ray.origin, vector3_scale(ray.dir, t));
+    return vec3_add(ray.origin, vec3_scale(ray.dir, t));
 }
 
-Vector_3 ray_direction(int i, int j, int w, int h)
+vec3 ray_direction(int i, int j, int w, int h)
 {
     /* 90 度垂直视场角等价于 fov = PI/2 */
     return ray_direction_fov(i, j, w, h, (float)(3.14159265358979323846 / 2.0));
 }
 
-Vector_3 ray_direction_fov(int i, int j, int w, int h, float fov)
+vec3 ray_direction_fov(int i, int j, int w, int h, float fov)
 {
     /*
     1.算 0..1 的像素中心
@@ -41,13 +41,13 @@ Vector_3 ray_direction_fov(int i, int j, int w, int h, float fov)
     */
     float half_h = tanf(fov * 0.5f);
     float half_w = half_h * aspect_ratio;
-    Vector_3 dir = {x * half_w, y * half_h, -1.0f};
+    vec3 dir = {x * half_w, y * half_h, -1.0f};
 
     /* 6.归一化:只保留方向信息,长度为 1 */
-    return vector3_normalize(dir);
+    return vec3_normalize(dir);
 }
 
-Vector_3 ray_direction_subpixel(int i, int j, int w, int h, float fov, float ox, float oy)
+vec3 ray_direction_subpixel(int i, int j, int w, int h, float fov, float ox, float oy)
 {
     /* 像素内偏移:ox/oy 属于 0..1 */
     float u = (i + ox) / (float)w;
@@ -61,6 +61,6 @@ Vector_3 ray_direction_subpixel(int i, int j, int w, int h, float fov, float ox,
 
     float half_h = tanf(fov * 0.5f);
     float half_w = half_h * aspect_ratio;
-    Vector_3 dir = {x * half_w, y * half_h, -1.0f};
-    return vector3_normalize(dir);
+    vec3 dir = {x * half_w, y * half_h, -1.0f};
+    return vec3_normalize(dir);
 }

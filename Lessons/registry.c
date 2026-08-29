@@ -43,11 +43,13 @@ const lesson_t *lesson_find(const char *id)
     return NULL;
 }
 
+// 启动默认课程
 const lesson_t *lesson_default(void)
 {
     return &lessons[LESSON_COUNT - 1];
 }
 
+// 打印课程表
 void lesson_list(void)
 {
     for (int i = 0; i < LESSON_COUNT; i++)

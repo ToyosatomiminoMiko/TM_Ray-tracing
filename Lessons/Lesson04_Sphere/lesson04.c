@@ -13,13 +13,13 @@ int lesson04_render(framebuffer_t *fb, float time_seconds)
 
     /* 定义一个球:放在 (0, 0, -3) 处,半径 1.0 */
     Sphere sphere = {{0.0f, 0.0f, -3.0f}, 1.0f};
-    Vector_3 origin = {0.0f, 0.0f, 0.0f};
+    vec3 origin = {0.0f, 0.0f, 0.0f};
 
     for (int j = 0; j < H; j++)
     {
         for (int i = 0; i < W; i++)
         {
-            Vector_3 dir = ray_direction(i, j, W, H);
+            vec3 dir = ray_direction(i, j, W, H);
             Ray ray = {origin, dir};
 
             /* 调用性能优化版求交 */
@@ -29,9 +29,9 @@ int lesson04_render(framebuffer_t *fb, float time_seconds)
             if (t > 0)
             {
                 /* 命中!计算命中点的位置 */
-                Vector_3 hit_point = ray_at(ray, t);
+                vec3 hit_point = ray_at(ray, t);
                 /* 计算法线(从球心指向命中点,并归一化) */
-                Vector_3 normal = sphere_normal_at(sphere, hit_point);
+                vec3 normal = sphere_normal_at(sphere, hit_point);
 
                 /* 把法线方向映射成颜色 */
                 r = (int)((normal.x + 1.0f) * 0.5f * 255.0f);

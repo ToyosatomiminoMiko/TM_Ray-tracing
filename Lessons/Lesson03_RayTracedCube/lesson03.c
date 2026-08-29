@@ -42,14 +42,14 @@ int lesson03_render(framebuffer_t *fb, float time_seconds)
     };
 
     box b2;
-    Vector_3 origin = {0.0f, 0.0f, 0.0f};
-    Matrix_4x4 S, R, T;
+    vec3 origin = {0.0f, 0.0f, 0.0f};
+    mat4 S, R, T;
 
     /* 时间驱动动画:每秒转一整圈(360 度),与帧率无关 */
     float r = DEG2RAD * (time_seconds * 360.0f);
 
     /* 构造模型矩阵:先缩放,再旋转,再平移 */
-    Matrix_4x4 model = {
+    mat4 model = {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
         {0, 0, 1, 0},
@@ -66,9 +66,9 @@ int lesson03_render(framebuffer_t *fb, float time_seconds)
     /* 变换顶点得到世界坐标 */
     for (int i = 0; i < 8; i++)
     {
-        Vector_4 temp = {b1[i][0], b1[i][1], b1[i][2], 1};
+        vec4 temp = {b1[i][0], b1[i][1], b1[i][2], 1};
         matrix_vector_multiply(temp, model, temp);
-        memcpy(b2[i], temp, sizeof(Vector_4));
+        memcpy(b2[i], temp, sizeof(vec4));
     }
 
     /*
@@ -81,17 +81,17 @@ int lesson03_render(framebuffer_t *fb, float time_seconds)
     {
         for (int i = 0; i < W; i++)
         {
-            Vector_3 dir = ray_direction(i, j, W, H);
+            vec3 dir = ray_direction(i, j, W, H);
             Ray ray = {origin, dir};
             float t_min = 1e30f;
             int hit = 0;
-            Vector_3 hit_normal = {0, 0, 0};
+            vec3 hit_normal = {0, 0, 0};
 
             for (int k = 0; k < 12; k++)
             {
-                Vector_3 V0 = {b2[tri_indices[k][0]][0], b2[tri_indices[k][0]][1], b2[tri_indices[k][0]][2]};
-                Vector_3 V1 = {b2[tri_indices[k][1]][0], b2[tri_indices[k][1]][1], b2[tri_indices[k][1]][2]};
-                Vector_3 V2 = {b2[tri_indices[k][2]][0], b2[tri_indices[k][2]][1], b2[tri_indices[k][2]][2]};
+                vec3 V0 = {b2[tri_indices[k][0]][0], b2[tri_indices[k][0]][1], b2[tri_indices[k][0]][2]};
+                vec3 V1 = {b2[tri_indices[k][1]][0], b2[tri_indices[k][1]][1], b2[tri_indices[k][1]][2]};
+                vec3 V2 = {b2[tri_indices[k][2]][0], b2[tri_indices[k][2]][1], b2[tri_indices[k][2]][2]};
 
                 float t, u, v;
                 if (ray_triangle_intersect(ray, V0, V1, V2, &t, &u, &v))

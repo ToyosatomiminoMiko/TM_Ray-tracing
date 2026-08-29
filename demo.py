@@ -1,4 +1,4 @@
-class Vector_3:
+class vec3:
     x: float = 0
     y: float = 0
     z: float = 0
@@ -12,52 +12,52 @@ class Vector_3:
         return f"{{{self.x},{self.y},{self.z}}}"
 
 
-def vector3_add(a: Vector_3, b: Vector_3) -> Vector_3:
-    return Vector_3(a.x + b.x, a.y + b.y, a.z + b.z)
+def vec3_add(a: vec3, b: vec3) -> vec3:
+    return vec3(a.x + b.x, a.y + b.y, a.z + b.z)
 
 
-def vector3_sub(a: Vector_3, b: Vector_3) -> Vector_3:
-    return Vector_3(a.x - b.x, a.y - b.y, a.z - b.z)
+def vec3_sub(a: vec3, b: vec3) -> vec3:
+    return vec3(a.x - b.x, a.y - b.y, a.z - b.z)
 
 
-def vector3_scale(v: Vector_3, s: float) -> Vector_3:
-    return Vector_3(v.x * s, v.y * s, v.z * s)
+def vec3_scale(v: vec3, s: float) -> vec3:
+    return vec3(v.x * s, v.y * s, v.z * s)
 
 
-def vector3_dot(a: Vector_3, b: Vector_3) -> float:
+def vec3_dot(a: vec3, b: vec3) -> float:
     return a.x * b.x + a.y * b.y + a.z * b.z
 
 
-def vector3_cross(a: Vector_3, b: Vector_3) -> Vector_3:
-    return Vector_3(
+def vec3_cross(a: vec3, b: vec3) -> vec3:
+    return vec3(
         a.y * b.z - a.z * b.y,
         a.z * b.x - a.x * b.z,
         a.x * b.y - a.y * b.x,
     )
 
 
-def vector3_length(v: Vector_3) -> float:
+def vec3_length(v: vec3) -> float:
     return pow(v.x * v.x + v.y * v.y + v.z * v.z, 0.5)
 
 
-def vector3_normalize(v: Vector_3) -> Vector_3:
-    length = vector3_length(v)
+def vec3_normalize(v: vec3) -> vec3:
+    length = vec3_length(v)
     if length == 0:
-        return Vector_3(0, 0, 0)
-    return vector3_scale(v, 1.0 / length)
+        return vec3(0, 0, 0)
+    return vec3_scale(v, 1.0 / length)
 
 
-def vector3_lerp(a: Vector_3, b: Vector_3, t: float) -> Vector_3:
-    return vector3_add(a, vector3_scale(vector3_sub(b, a), t))
+def vec3_lerp(a: vec3, b: vec3, t: float) -> vec3:
+    return vec3_add(a, vec3_scale(vec3_sub(b, a), t))
 
 
-def vector3_reflect(d: Vector_3, n: Vector_3) -> Vector_3:
-    return vector3_sub(d, vector3_scale(n, 2.0 * vector3_dot(d, n)))
+def vec3_reflect(d: vec3, n: vec3) -> vec3:
+    return vec3_sub(d, vec3_scale(n, 2.0 * vec3_dot(d, n)))
 
 
 if __name__ == "__main__":
-    v1 = Vector_3(1, 2, 3)
-    print(vector3_normalize(v1))
-    a = Vector_3(1, 0, 0)
-    b = Vector_3(0, 1, 0)
-    print(vector3_dot(a, b), vector3_cross(a, b))
+    v1 = vec3(1, 2, 3)
+    print(vec3_normalize(v1))
+    a = vec3(1, 0, 0)
+    b = vec3(0, 1, 0)
+    print(vec3_dot(a, b), vec3_cross(a, b))

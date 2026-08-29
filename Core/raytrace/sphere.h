@@ -6,7 +6,7 @@
 /* 球:球心 + 半径 */
 typedef struct
 {
-    Vector_3 center;
+    vec3 center;
     float radius;
 } Sphere;
 
@@ -28,6 +28,6 @@ float intersect_sphere_simple(Ray ray, Sphere sphere);
 float intersect_sphere_fast(Ray ray, Sphere sphere);
 
 /* 球面法线:N = (P-C)/R,即球心指向命中点再归一化 */
-Vector_3 sphere_normal_at(Sphere sphere, Vector_3 point);
+vec3 sphere_normal_at(Sphere sphere, vec3 point);
 
 #endif /* SPHERE_H_ */

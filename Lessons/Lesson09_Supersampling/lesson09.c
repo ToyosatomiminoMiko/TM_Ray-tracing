@@ -14,7 +14,7 @@
 typedef struct
 {
     Sphere sphere;
-    Vector_3 albedo;
+    vec3 albedo;
     float shininess;
 } SceneObject;
 
@@ -26,7 +26,7 @@ static const SceneObject objects[] = {
 };
 #define OBJECT_COUNT (int)(sizeof(objects) / sizeof(objects[0]))
 
-static const Vector_3 light_pos = {2.0f, 2.2f, -1.0f};
+static const vec3 light_pos = {2.0f, 2.2f, -1.0f};
 static const float ambient_strength = 0.12f;
 static const float specular_strength = 0.8f;
 
@@ -34,10 +34,10 @@ static const float specular_strength = 0.8f;
 对像素 (i,j) 内偏移 (ox,oy)(0..1 表示像素内相对位置)采样一条光线,
 返回该子像素的颜色(0..1).
 */
-static Vector_3 sample_color(int i, int j, float ox, float oy)
+static vec3 sample_color(int i, int j, float ox, float oy)
 {
-    Vector_3 origin = {0.0f, 0.0f, 0.0f};
-    Vector_3 dir = ray_direction_subpixel(
+    vec3 origin = {0.0f, 0.0f, 0.0f};
+    vec3 dir = ray_direction_subpixel(
         i, j, W, H,
         (float)(3.14159265358979323846 / 2.0),
         ox, oy);
@@ -59,24 +59,24 @@ static Vector_3 sample_color(int i, int j, float ox, float oy)
     if (nearest < 0)
     {
         float sky = (dir.y + 1.0f) * 0.5f;
-        return (Vector_3){sky, sky, 1.0f};
+        return (vec3){sky, sky, 1.0f};
     }
 
     const SceneObject *obj = &objects[nearest];
-    Vector_3 P = ray_at(ray, t_nearest);
-    Vector_3 N = sphere_normal_at(obj->sphere, P);
-    Vector_3 L = vector3_normalize(vector3_sub(light_pos, P));
-    Vector_3 V = vector3_normalize(vector3_scale(dir, -1.0f));
-    Vector_3 half = vector3_normalize(vector3_add(L, V));
+    vec3 P = ray_at(ray, t_nearest);
+    vec3 N = sphere_normal_at(obj->sphere, P);
+    vec3 L = vec3_normalize(vec3_sub(light_pos, P));
+    vec3 V = vec3_normalize(vec3_scale(dir, -1.0f));
+    vec3 half = vec3_normalize(vec3_add(L, V));
 
-    float diff = vector3_dot(N, L);
+    float diff = vec3_dot(N, L);
     if (diff < 0)
         diff = 0;
 
     /* 阴影 */
-    Vector_3 shadow_origin = vector3_add(P, vector3_scale(N, 0.001f));
+    vec3 shadow_origin = vec3_add(P, vec3_scale(N, 0.001f));
     Ray shadow_ray = {shadow_origin, L};
-    float dist_to_light = vector3_length(vector3_sub(light_pos, P));
+    float dist_to_light = vec3_length(vec3_sub(light_pos, P));
     for (int k = 0; k < OBJECT_COUNT; k++)
     {
         float ts = intersect_sphere_fast(shadow_ray, objects[k].sphere);
@@ -90,13 +90,13 @@ static Vector_3 sample_color(int i, int j, float ox, float oy)
     float spec = 0.0f;
     if (diff > 0)
     {
-        float ndoth = vector3_dot(N, half);
+        float ndoth = vec3_dot(N, half);
         if (ndoth > 0)
             spec = powf(ndoth, obj->shininess) * specular_strength;
     }
 
     float brightness = ambient_strength + (1.0f - ambient_strength) * diff;
-    return (Vector_3){
+    return (vec3){
         obj->albedo.x * brightness + spec,
         obj->albedo.y * brightness + spec,
         obj->albedo.z * brightness + spec};
@@ -117,7 +117,7 @@ int lesson09_render(framebuffer_t *fb, float time_seconds)
             {
                 /* 左半:每像素 1 条光线,走像素中心 */
                 samples = 1;
-                Vector_3 c = sample_color(i, j, 0.5f, 0.5f);
+                vec3 c = sample_color(i, j, 0.5f, 0.5f);
                 r += c.x;
                 g += c.y;
                 b += c.z;
@@ -132,7 +132,7 @@ int lesson09_render(framebuffer_t *fb, float time_seconds)
                     {
                         float ox = (sx + 0.5f) / 4.0f;
                         float oy = (sy + 0.5f) / 4.0f;
-                        Vector_3 c = sample_color(i, j, ox, oy);
+                        vec3 c = sample_color(i, j, ox, oy);
                         r += c.x;
                         g += c.y;
                         b += c.z;
