@@ -5,7 +5,7 @@
 #include "sphere.h"
 
 /*
-第 9 课:超采样抗锯齿(MSAA)
+第 9 课:SSAA(超级采样抗锯齿, Supersampling Anti-Aliasing)
 扩展点:
 1. 每个像素不再只发 1 条光线,而是发 4x4=16 条子光线
 2. 子光线均匀分布在像素内,颜色取平均

@@ -22,9 +22,9 @@
 */
 
 #define DEG2RAD (3.14159265358979323846f / 180.0f)
-#define FOV (60.0f * DEG2RAD)   /* 垂直视场角,与第 8 课一致 */
-#define SS 2                    /* 每像素 2x2 = 4 条子光线,让渲染有足够工作量又不至于太慢 */
-#define MID_X (W / 2)           /* 左/右两个对比区的分界线 */
+#define FOV (60.0f * DEG2RAD) /* 垂直视场角,与第 8 课一致 */
+#define SS 2                  /* 每像素 2x2 = 4 条子光线,让渲染有足够工作量又不至于太慢 */
+#define MID_X (W / 2)         /* 左/右两个对比区的分界线 */
 #define MAX_THREADS 32
 
 typedef struct
@@ -50,8 +50,14 @@ static const vec3 plane_normal = {0.0f, 1.0f, 0.0f};
 
 /* 线程条使用的颜色,方便看出"谁负责哪几行" */
 static const pixel_color_t thread_colors[] = {
-    0xE74C3Cu, 0x2ECC71u, 0x3498DBu, 0xF1C40Fu,
-    0x9B59B6u, 0x1ABC9Cu, 0xE67E22u, 0x95A5A6u,
+    0xE74C3Cu,
+    0x2ECC71u,
+    0x3498DBu,
+    0xF1C40Fu,
+    0x9B59B6u,
+    0x1ABC9Cu,
+    0xE67E22u,
+    0x95A5A6u,
 };
 #define THREAD_COLOR_COUNT \
     (int)(sizeof(thread_colors) / sizeof(thread_colors[0]))
@@ -161,7 +167,7 @@ static vec3 trace_color(Ray ray)
 static double wall_seconds(void)
 {
     struct timespec ts;
-    clock_gettime(1, &ts);
+    clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
 
