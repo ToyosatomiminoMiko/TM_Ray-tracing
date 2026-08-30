@@ -2,6 +2,7 @@
 #define PLANE_H_
 
 #include "ray.h"
+#include <math.h>
 
 /*
 平面求交:
@@ -9,8 +10,8 @@
 代入光线 X=O+t*D:
   t = ((P0-O)·n) / (D·n)
 当 |D·n| 接近 0 时光线与平面平行,没有交点.
-返回 1 相交,0 不相交.
+返回值:t(距离);未命中或交点在射线背后返回 NAN.
 */
-int intersect_plane(Ray ray, vec3 normal, vec3 point, float *t);
+float intersect_plane(Ray ray, vec3 normal, vec3 point);
 
 #endif /* PLANE_H_ */

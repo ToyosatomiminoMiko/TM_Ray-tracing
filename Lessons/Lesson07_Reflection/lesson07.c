@@ -104,8 +104,8 @@ static vec3 checker_color(vec3 P)
 static vec3 trace_color(Ray ray, int depth)
 {
     /* 先求地面交点,再把所有球比一遍,取 t 最小的作为"可见表面" */
-    float t_plane = 0.0f;
-    int hit_plane = intersect_plane(ray, plane_normal, (vec3){0.0f, plane_y, 0.0f}, &t_plane);
+    float t_plane = intersect_plane(ray, plane_normal, (vec3){0.0f, plane_y, 0.0f});
+    int hit_plane = t_plane > 0.0f;
 
     int nearest = -1;
     float t_nearest = hit_plane ? t_plane : 1e30f;

@@ -60,8 +60,8 @@ static const pixel_color_t thread_colors[] = {
 static vec3 trace_color(Ray ray)
 {
     /* 先算地面,再算所有球,t 最小的才是"这束光线看见的表面" */
-    float t_plane = 0.0f;
-    int hit_plane = intersect_plane(ray, plane_normal, (vec3){0.0f, plane_y, 0.0f}, &t_plane);
+    float t_plane = intersect_plane(ray, plane_normal, (vec3){0.0f, plane_y, 0.0f});
+    int hit_plane = t_plane > 0.0f;
 
     int nearest = -1;
     float t_nearest = hit_plane ? t_plane : 1e30f;
