@@ -13,7 +13,7 @@ Core/math            vec3/mat4:纯数学函数,注释带公式
 Core/render          内存帧缓冲 + PPM 输出(output_ansi 保留供终端调试)
 Core/raytrace        光线/球/三角形/平面求交 + 贴图
 Lessons/             每节课一个目录,Lesson01 到 Lesson11(10/11 为支线)
-Docs/                理论和方法文档
+Docs/                理论和方法文档(编号与课程一一对应)
 ```
 
 详细说明见 [Docs/README.md](Docs/README.md).
