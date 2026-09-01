@@ -45,3 +45,21 @@ vec3 sphere_normal_at(Sphere sphere, vec3 point)
 {
     return vec3_normalize(vec3_sub(point, sphere.center));
 }
+
+void sphere_uv_at(Sphere sphere, vec3 point, float *out_u, float *out_v)
+{
+    static const float PI_F = 3.14159265358979323846f;
+
+    vec3 n = sphere_normal_at(sphere, point);
+
+    /* 经度:取 atan2(n.x, n.z).
+       相机在原点朝 -Z 看,可见半球的外法线朝 +Z,
+       这样正对本初子午线(u=0.5)看地球时,东经在右、西经在左. */
+    float lon = atan2f(n.x, n.z);
+    /* 纬度:y 轴正方向是北极,所以 lat 范围 [-π/2, π/2] */
+    float lat = asinf(n.y);
+
+    /* u:经度占整圈 360° 的比例,中心 u=0.5;v:纬度占 180° 的比例,北极 v=0 */
+    *out_u = 0.5f + lon / (2.0f * PI_F);
+    *out_v = 0.5f - lat / PI_F;
+}

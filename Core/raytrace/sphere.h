@@ -30,4 +30,14 @@ float intersect_sphere_fast(Ray ray, Sphere sphere);
 /* 球面法线:N = (P-C)/R,即球心指向命中点再归一化 */
 vec3 sphere_normal_at(Sphere sphere, vec3 point);
 
+/*
+球面贴图 UV(等距圆柱投影,对应 world.ppm 这类 2:1 世界地图):
+把命中点 P 换成单位法线 n = (P-C)/R,再映射经纬度.
+- 纬度 φ = asin(n.y),贴图 v = 0.5 - φ/π,v=0 是北极(图片第一行);
+- 经度 λ = atan2(n.x, n.z):本初子午线朝 +Z(相机方向),东经朝 +X,
+  u = 0.5 + λ/(2π),所以 u=0.5 是本初子午线,右半边是东半球.
+u/v 都落在 [0,1),通过 out 参数返回.
+*/
+void sphere_uv_at(Sphere sphere, vec3 point, float *out_u, float *out_v);
+
 #endif /* SPHERE_H_ */

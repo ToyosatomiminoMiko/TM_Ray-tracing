@@ -43,7 +43,7 @@ static vec3 sample_color(int i, int j, float ox, float oy)
         ox, oy);
     Ray ray = {origin, dir};
 
-    /* 与第 6 课相同:找最近球、算漫反射 + 高光 + 阴影 */
+    /* 与第 6 课相同:找最近球/算漫反射 + 高光 + 阴影 */
     int nearest = -1;
     float t_nearest = 1e30f;
     for (int k = 0; k < OBJECT_COUNT; k++)

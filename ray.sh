@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 用户交互层:选课菜单、管道给 ffmpeg 生成 mp4/gif.
+# 用户交互层:选课菜单/管道给 ffmpeg 生成 mp4/gif.
 # 输出方式只提供 ppm / mp4 / gif 三种,不提供终端播放.
 # C 程序只负责渲染,所有"问用户要什么"的事情都在这里.
 set -euo pipefail
