@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# ============================================================================
+# pre-commit: 提交前自动把中文全角标点转成半角
+# ----------------------------------------------------------------------------
+# 真正的替换由仓库根的 autorun.py 完成, 这里只负责"找出本次暂存的文件".
+# 本文件通过 core.hooksPath 生效(启用方式见 autorun.py 头部注释):
+#     git config --local core.hooksPath .githooks
+# 临时跳过某次提交:  git commit --no-verify
+#
+# 流程:
+#   git diff --cached --name-only -z --diff-filter=ACM
+#     -> 取出本次暂存的新增/修改/复制文件(不含删除)
+#     -> python3 autorun.py <file>   逐个文件原地改写
+#     -> git add -- <file>           把改写结果并回暂存区, 进入这一次提交
+#
+# 本文件自身标点已全部是半角, 转换对它是恒等操作(幂等, 不会产生多余 diff).
+# 为稳妥起见它排在最后处理: 避免 bash 还在读取脚本时改写正在运行的文件.
+# ============================================================================
+set -u
+
+repo_root=$(git rev-parse --show-toplevel) || exit 0
+cd "$repo_root" || exit 0
+
+hook_rel=".githooks/pre-commit"
+fixer="autorun.py"
+
+# 没装 python3 的环境放行提交, 不阻断别人(与 autorun.py 的说明一致).
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "[pre-commit] 警告: 未找到 python3, 跳过全角标点转换." >&2
+    exit 0
+fi
+
+if [ ! -f "$fixer" ]; then
+    echo "[pre-commit] 警告: 未找到 $fixer, 跳过全角标点转换." >&2
+    exit 0
+fi
+
+# -z 用 NUL 分隔, 文件名含空格或换行也不会被拆错.
+staged_list=$(mktemp) || exit 1
+trap 'rm -f "$staged_list"' EXIT
+git diff --cached --name-only -z --diff-filter=ACM > "$staged_list" || exit 1
+
+failed=0
+deferred_hook=""
+
+fix_one() {
+    local f=$1 out
+    if out=$(python3 "$fixer" "$f" 2>&1); then
+        if [ -n "$out" ]; then
+            echo "$out"
+            git add -- "$f" || failed=1
+        fi
+    else
+        echo "$out" >&2
+        failed=1
+    fi
+}
+
+while IFS= read -r -d '' f; do
+    if [ "$f" = "$hook_rel" ]; then
+        deferred_hook=$f
+        continue
+    fi
+    [ -f "$f" ] || continue
+    fix_one "$f"
+done < "$staged_list"
+
+# hook 自身最后处理, 见文件头说明.
+if [ -n "$deferred_hook" ] && [ -f "$deferred_hook" ]; then
+    fix_one "$deferred_hook"
+fi
+
+if [ "$failed" -ne 0 ]; then
+    echo "[pre-commit] 有文件转换失败, 提交已中止(可用 git commit --no-verify 跳过)." >&2
+    exit 1
+fi
+exit 0
