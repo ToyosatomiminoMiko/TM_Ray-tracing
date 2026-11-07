@@ -14,6 +14,7 @@
 #include "Lesson09_Supersampling/lesson09.h"
 #include "Lesson10_Multithreading/lesson10.h"
 #include "Lesson11_TextureEarth/lesson11.h"
+#include "Lesson12_GlassBlock/lesson12.h"
 
 /*
 课程注册表:
@@ -34,6 +35,7 @@ static const lesson_t lessons[] = {
     {"lesson09", "09 超采样抗锯齿(左右对比)", 0, lesson09_render},
     {"lesson10", "10 多线程渲染(支线)", 0, lesson10_render},
     {"lesson11", "11 贴图/材质:世界地图地球(支线)", 1, lesson11_render},
+    {"lesson12", "12 PNG 贴图 + Alpha 混合:MC 玻璃方块(支线)", 0, lesson12_render},
 };
 #define LESSON_COUNT (int)(sizeof(lessons) / sizeof(lessons[0]))
 

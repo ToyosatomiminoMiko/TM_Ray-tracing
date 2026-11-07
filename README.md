@@ -11,8 +11,9 @@ main.c               课程入口与输出模式控制
 ray.sh               shell 入口:交互选课 + ffmpeg 视频编码
 Core/math            vec3/mat4:纯数学函数,注释带公式
 Core/render          内存帧缓冲 + PPM 输出(output_ansi 保留供终端调试)
-Core/raytrace        光线/球/三角形/平面求交 + 贴图
-Lessons/             每节课一个目录,Lesson01 到 Lesson11(10/11 为支线)
+Core/raytrace        光线/球/三角形/平面求交 + 贴图 + PNG 解码
+Lessons/             每节课一个目录,Lesson01 到 Lesson12(10/11/12 为支线)
+png_reader/          PNG 素材与读取脚本(glass.png 供 lesson12 使用)
 Docs/                理论和方法文档(编号与课程一一对应)
 ```
 
@@ -38,6 +39,8 @@ cmake --build .
 ```
 
 生成可执行文件 `build/ray_tracing`.
+构建还需要 zlib(PNG 解码用):CMake 里通过 `find_package(ZLIB REQUIRED)` 查找,
+一般 Linux 已自带,缺少时安装 zlib 开发包.
 
 ## 运行
 
@@ -75,6 +78,7 @@ cmake --build .
 | lesson09 | 超采样抗锯齿(左右对比) |
 | lesson10 | 多线程渲染(支线,左右对比单线程/多线程耗时) |
 | lesson11 | 贴图/材质(支线):world.ppm 世界地图 -> 旋转地球(动画) |
+| lesson12 | MC 玻璃块 + PNG 贴图(支线,静态):RGBA 贴图 + alpha 混合 |
 
 动画是帧驱动的:所有动画课程共用全局 `ANIMATION_FRAMES`(默认 240 帧,
 60fps 下 4 秒一圈),画面由帧号决定;
@@ -82,3 +86,6 @@ MP4 默认 60fps/GIF 固定 25fps 只是编码端的播放设置,不影响动画
 
 lesson11 需要仓库根目录的 `world.ppm`(等距圆柱世界地图)作为贴图素材;
 运行 `ray.sh` 时脚本会先切到仓库根目录,贴图路径总能找到.
+
+lesson12 需要 `png_reader/glass.png`(16x16 RGBA 的 MC 玻璃贴图);
+它的 PNG 解码通过 zlib 解压 IDAT,CMake 里用 `find_package(ZLIB REQUIRED)` 查找并链接.

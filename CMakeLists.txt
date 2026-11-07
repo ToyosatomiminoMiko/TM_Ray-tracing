@@ -15,6 +15,8 @@ add_executable(ray_tracing
 )
 
 find_package(Threads REQUIRED)
+# PNG 解码用 zlib 解压 IDAT 数据(见 Core/raytrace/png.c),zlib 是一般系统自带的库
+find_package(ZLIB REQUIRED)
 
 target_include_directories(ray_tracing PRIVATE
     Core/math
@@ -23,4 +25,4 @@ target_include_directories(ray_tracing PRIVATE
     Lessons
 )
 
-target_link_libraries(ray_tracing PRIVATE m Threads::Threads)
+target_link_libraries(ray_tracing PRIVATE m Threads::Threads ZLIB::ZLIB)
